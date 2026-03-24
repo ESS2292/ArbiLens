@@ -29,6 +29,8 @@ Primary outputs:
 - PDF export
 - contract comparison
 
+The core workflow in this repository is contract ingestion through structured results. Report export, comparison, and billing are implemented, but they are secondary to that main path and should be read that way.
+
 ## What This Project Demonstrates
 
 - Service-oriented FastAPI backend design with thin route handlers
@@ -39,6 +41,21 @@ Primary outputs:
 - Deterministic scoring separated from AI-generated explanation text
 - Typed frontend API integration with status polling and failure-state handling
 - Practical test coverage around auth, uploads, parsing, extraction, scoring, reports, and workflow failures
+
+## Verification Status
+
+Last repository verification pass: March 24, 2026.
+
+Verified directly in this repository:
+
+- backend source compiles cleanly with `python3 -m compileall backend/app backend/alembic`
+- local startup flows are documented for Docker Compose and split local services
+- GitHub Actions CI is configured to run backend tests plus frontend typechecks and tests on push and pull request
+
+Not verified in this repository snapshot:
+
+- browser-level end-to-end UI automation
+- a live production deployment target
 
 ## Architecture
 
@@ -288,7 +305,6 @@ This is still an MVP-level security posture. Notable gaps remain around browser 
 
 - No heavy OCR fallback for scanned PDFs
 - No full enterprise auth model or SSO
-- No full CI setup included in the repo yet
 - No browser-level frontend integration test suite
 - Stripe webhook handling does not yet persist processed event IDs for idempotency
 - Readiness checks are practical but not a full operational health system
