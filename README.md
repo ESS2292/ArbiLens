@@ -1,5 +1,7 @@
 # ArbiLens
 
+[![CI](https://github.com/ESS2292/ArbiLens/actions/workflows/ci.yml/badge.svg)](https://github.com/ESS2292/ArbiLens/actions/workflows/ci.yml)
+
 ArbiLens is a contract review application that combines deterministic risk scoring with AI-assisted clause extraction and explanation.
 
 The repository is intentionally built as a monorepo with a real application shape:
@@ -78,6 +80,11 @@ The repo is organized around clear boundaries:
 
 More detail: `docs/architecture.md`
 
+Related engineering notes:
+
+- `docs/design-decisions.md`
+- `docs/reliability.md`
+
 ## Repository Map
 
 If you are reviewing the codebase quickly, these are the highest-signal paths:
@@ -154,6 +161,8 @@ Why that matters:
 - AI extraction is bounded chunk-by-chunk instead of sending entire contracts in one prompt.
 - Risk scoring is rules-based, which improves consistency but limits nuanced policy interpretation.
 - The frontend uses straightforward client-side session storage for the MVP instead of more complex session infrastructure.
+
+For the reasoning behind those choices, see `docs/design-decisions.md`.
 
 ## Local Development
 
@@ -265,6 +274,8 @@ Additional setup notes: `docs/development.md`
 
 Operational and deployment notes: `docs/deployment.md`
 
+Reliability and failure-mode notes: `docs/reliability.md`
+
 ## API Notes
 
 Authentication:
@@ -314,7 +325,7 @@ This is still an MVP-level security posture. Notable gaps remain around browser 
 - OCR fallback for image-only PDFs
 - richer comparison explanations grounded in structured diffs
 - stronger observability around queue depth, failures, and worker performance
-- CI pipelines for test, lint, and typecheck enforcement
+- extend CI to include linting, dependency checks, and browser-level integration coverage
 - more robust frontend auth/session handling
 - webhook idempotency persistence and broader billing coverage
 
@@ -325,5 +336,7 @@ The repository includes deployment-oriented Dockerfiles and local Compose config
 Deployment notes:
 
 - `docs/architecture.md`
+- `docs/design-decisions.md`
 - `docs/deployment.md`
 - `docs/development.md`
+- `docs/reliability.md`

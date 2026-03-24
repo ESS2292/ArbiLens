@@ -158,4 +158,9 @@ The architecture is realistic, but still incomplete in several areas:
 - no deep observability or metrics stack
 - no webhook event-id persistence for Stripe idempotency
 - no enterprise auth or SSO
-- no CI pipeline included in the repo
+- no browser-level end-to-end suite
+
+Related docs:
+
+- `docs/design-decisions.md`
+- `docs/reliability.md`

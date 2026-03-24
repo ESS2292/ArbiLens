@@ -132,14 +132,14 @@ Current implementation verifies webhook signatures, but does not yet persist pro
 
 - Compose is suitable for local development, not full deployment orchestration.
 - Frontend runtime configuration is minimal and intended for local/default use.
-- No CI pipeline or release automation is included in the repo.
+- CI exists for backend tests plus frontend typechecks and tests, but release automation is not included.
 - No production secret-management, ingress, or managed service configuration is defined here.
 - Worker observability is limited to logs and persisted job state.
 - Readiness checks are practical, not exhaustive.
 
 ## What Still Prevents A Production Claim
 
-- no CI/CD definition in the repo
+- no release automation or deployment pipeline
 - no infrastructure-as-code beyond local Docker Compose
 - no advanced observability stack
 - no webhook idempotency persistence
