@@ -140,8 +140,11 @@ class ReportService:
             write_line(f"  Rationale: {issue.rationale}", gap=12)
             write_line(f"  Recommendation: {issue.recommendation}", gap=12)
             citation = issue.citations[0] if issue.citations else {}
+            clause_id = citation.clause_id if hasattr(citation, "clause_id") else citation.get("clause_id", "n/a")
+            page_start = citation.page_start if hasattr(citation, "page_start") else citation.get("page_start", "?")
+            page_end = citation.page_end if hasattr(citation, "page_end") else citation.get("page_end", "?")
             write_line(
-                f"  Citation: clause {citation.get('clause_id', 'n/a')} pages {citation.get('page_start', '?')}-{citation.get('page_end', '?')}",
+                f"  Citation: clause {clause_id or 'n/a'} pages {page_start}-{page_end}",
                 gap=14,
             )
 

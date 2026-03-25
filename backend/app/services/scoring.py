@@ -29,7 +29,7 @@ class RiskRuleResult:
 class DeterministicRiskScoringService:
     def __init__(self, session: Session, ai_service: OpenAIResponsesService | None = None) -> None:
         self.session = session
-        self.ai_service = ai_service or OpenAIResponsesService()
+        self.ai_service = ai_service
 
     def analyze_and_persist(self, document_version: DocumentVersion, analysis_job_id: str) -> list[Risk]:
         for risk in list(document_version.risks):
@@ -184,7 +184,7 @@ class DeterministicRiskScoringService:
             f"Clause text excerpt: {(result.clause.text[:1200] if result.clause else 'No clause found')}"
         )
         try:
-            response = self.ai_service.generate_structured_output(
+            response = self._get_ai_service().generate_structured_output(
                 system_prompt=(
                     "You explain a risk that has already been scored deterministically. "
                     "Do not change the score or severity. Provide concise, contract-focused explanation."
@@ -205,6 +205,11 @@ class DeterministicRiskScoringService:
                 recommendation=result.recommendation,
                 confidence=0.55,
             )
+
+    def _get_ai_service(self) -> OpenAIResponsesService:
+        if self.ai_service is None:
+            self.ai_service = OpenAIResponsesService()
+        return self.ai_service
 
     def _build_citations(
         self,

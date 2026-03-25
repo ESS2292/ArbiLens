@@ -195,15 +195,15 @@ def test_ai_clause_candidate_with_wrong_chunk_index_is_discarded(db_session: Ses
     version = _build_version_graph(db_session)
     chunk = DocumentChunk(
         document_version_id=version.id,
-        chunk_index=4,
-        section_title="Confidentiality",
+        chunk_index=7,
+        section_title="Operational Notes",
         page_start=3,
         page_end=3,
-        text="Confidential information must not be disclosed.",
+        text="This section describes operational dependencies without naming a known clause heading.",
         token_count=10,
-        char_count=47,
+        char_count=86,
         char_start=0,
-        char_end=47,
+        char_end=86,
     )
     db_session.add(chunk)
     db_session.flush()
@@ -214,7 +214,7 @@ def test_ai_clause_candidate_with_wrong_chunk_index_is_discarded(db_session: Ses
                 {
                     "clause_type": "confidentiality",
                     "title": "Confidentiality",
-                    "extracted_text": "Confidential information must not be disclosed.",
+                    "extracted_text": "This section describes operational dependencies without naming a known clause heading.",
                     "confidence": 0.8,
                     "source_chunk_index": 999,
                     "page_start": 3,

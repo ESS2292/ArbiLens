@@ -48,7 +48,7 @@ class ExtractedClauseCandidate:
 class ClauseExtractionService:
     def __init__(self, session: Session, ai_service: OpenAIResponsesService | None = None) -> None:
         self.session = session
-        self.ai_service = ai_service or OpenAIResponsesService()
+        self.ai_service = ai_service
 
     def extract_and_persist(self, document_version: DocumentVersion) -> list[Clause]:
         for clause in list(document_version.clauses):
@@ -112,7 +112,7 @@ class ClauseExtractionService:
             f"Chunk text:\n{chunk.text}"
         )
         try:
-            response = self.ai_service.generate_structured_output(
+            response = self._get_ai_service().generate_structured_output(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
                 response_schema=ClauseExtractionResponseSchema,
@@ -143,6 +143,11 @@ class ClauseExtractionService:
             # "helpful" model paraphrases becoming source text.
             if self._candidate_matches_chunk(item, chunk)
         ]
+
+    def _get_ai_service(self) -> OpenAIResponsesService:
+        if self.ai_service is None:
+            self.ai_service = OpenAIResponsesService()
+        return self.ai_service
 
     def _dedupe(self, candidates: Iterable[ExtractedClauseCandidate]) -> list[ExtractedClauseCandidate]:
         deduped: dict[tuple[ClauseType, str], ExtractedClauseCandidate] = {}

@@ -52,7 +52,7 @@ def _build_document_with_analysis(db_session: Session) -> tuple[User, Document]:
         current_stage="completed",
     )
     clause = Clause(
-        document_version_id=version.id,
+        document_version=version,
         clause_type=ClauseType.limitation_of_liability,
         title="Limitation of Liability",
         text="Liability is unlimited.",

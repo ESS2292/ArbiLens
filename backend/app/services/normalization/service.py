@@ -32,19 +32,30 @@ class NormalizedDocument:
 
 class DocumentNormalizationService:
     def normalize(self, parsed_document: ParsedDocument) -> NormalizedDocument:
+        global_frequency = self._line_frequency(
+            section.text for section in parsed_document.sections if section.text
+        )
         cleaned_sections = [
             ParsedSection(
                 heading=self._normalize_heading(section.heading) if section.heading else None,
-                text=self._clean_text(section.text),
+                text=self._clean_text(section.text, frequency=global_frequency),
                 page_start=section.page_start,
                 page_end=section.page_end,
             )
             for section in parsed_document.sections
-            if self._clean_text(section.text)
+            if self._clean_text(section.text, frequency=global_frequency)
         ]
 
         if not cleaned_sections and parsed_document.full_text:
-            cleaned_sections = [ParsedSection(heading=None, text=self._clean_text(parsed_document.full_text))]
+            cleaned_sections = [
+                ParsedSection(
+                    heading=None,
+                    text=self._clean_text(
+                        parsed_document.full_text,
+                        frequency=self._line_frequency([parsed_document.full_text]),
+                    ),
+                )
+            ]
 
         cleaned_text = "\n\n".join(
             f"{section.heading}\n{section.text}" if section.heading else section.text
@@ -57,9 +68,9 @@ class DocumentNormalizationService:
             chunks=self._chunk_sections(cleaned_sections),
         )
 
-    def _clean_text(self, text: str) -> str:
+    def _clean_text(self, text: str, *, frequency: dict[str, int]) -> str:
         lines = [line.rstrip() for line in text.splitlines()]
-        filtered_lines = self._remove_repeated_noise(lines)
+        filtered_lines = self._remove_repeated_noise(lines, frequency=frequency)
         rebuilt: list[str] = []
 
         for line in filtered_lines:
@@ -82,13 +93,7 @@ class DocumentNormalizationService:
         normalized = re.sub(r"\n{3,}", "\n\n", normalized)
         return normalized.strip()
 
-    def _remove_repeated_noise(self, lines: list[str]) -> list[str]:
-        frequency: dict[str, int] = {}
-        for line in lines:
-            candidate = line.strip()
-            if candidate:
-                frequency[candidate] = frequency.get(candidate, 0) + 1
-
+    def _remove_repeated_noise(self, lines: list[str], *, frequency: dict[str, int]) -> list[str]:
         # Repeated short lines are usually headers, footers, or page markers rather than
         # substantive contract text.
         return [
@@ -97,19 +102,30 @@ class DocumentNormalizationService:
             if not self._is_repeated_noise(line.strip(), frequency)
         ]
 
+    def _line_frequency(self, texts: list[str] | tuple[str, ...] | object) -> dict[str, int]:
+        frequency: dict[str, int] = {}
+        for text in texts:
+            for line in text.splitlines():
+                candidate = line.strip()
+                if candidate:
+                    frequency[candidate] = frequency.get(candidate, 0) + 1
+        return frequency
+
     def _is_repeated_noise(self, line: str, frequency: dict[str, int]) -> bool:
         if not line:
             return False
-        if frequency.get(line, 0) < 2:
-            return False
         if re.fullmatch(r"page \d+ of \d+", line, re.IGNORECASE):
             return True
+        if frequency.get(line, 0) < 2:
+            return False
         if len(line) <= 80 and not re.search(r"[.;:]\s*$", line):
             return True
         return False
 
     def _should_join_lines(self, previous: str, current: str) -> bool:
         if not previous or previous.endswith((".", ";", ":", "?", "!", ")")):
+            return False
+        if self._looks_like_heading(previous):
             return False
         if self._looks_like_heading(current):
             return False

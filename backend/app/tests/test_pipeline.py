@@ -1,11 +1,14 @@
 from io import BytesIO
+from uuid import UUID
 
+import pytest
 from docx import Document as DocxDocument
 from fastapi.testclient import TestClient
 from reportlab.pdfgen import canvas
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import get_settings
+from app.core.errors import AppError
 from app.models.analysis_job import AnalysisJob
 from app.models.clause import Clause
 from app.models.document import Document
@@ -58,7 +61,7 @@ def test_pipeline_happy_path_runs_from_uploaded_document_to_completed_results(
     assert upload_response.status_code == 201
     payload = upload_response.json()
 
-    version = db_session.get(DocumentVersion, payload["document_version_id"])
+    version = db_session.get(DocumentVersion, UUID(payload["document_version_id"]))
     assert version is not None
     version.original_filename = "msa.pdf"
     db_session.commit()
@@ -74,9 +77,9 @@ def test_pipeline_happy_path_runs_from_uploaded_document_to_completed_results(
     document_tasks.analyze_risks_task.run(payload["job_id"])
 
     db_session.expire_all()
-    refreshed_job = db_session.get(AnalysisJob, payload["job_id"])
-    refreshed_version = db_session.get(DocumentVersion, payload["document_version_id"])
-    refreshed_document = db_session.get(Document, payload["document_id"])
+    refreshed_job = db_session.get(AnalysisJob, UUID(payload["job_id"]))
+    refreshed_version = db_session.get(DocumentVersion, UUID(payload["document_version_id"]))
+    refreshed_document = db_session.get(Document, UUID(payload["document_id"]))
 
     assert refreshed_job is not None
     assert refreshed_job.status == JobStatus.completed
@@ -140,8 +143,8 @@ def test_pipeline_happy_path_runs_for_docx_upload(
     document_tasks.analyze_risks_task.run(payload["job_id"])
 
     db_session.expire_all()
-    refreshed_version = db_session.get(DocumentVersion, payload["document_version_id"])
-    refreshed_document = db_session.get(Document, payload["document_id"])
+    refreshed_version = db_session.get(DocumentVersion, UUID(payload["document_version_id"]))
+    refreshed_document = db_session.get(Document, UUID(payload["document_id"]))
 
     assert refreshed_version is not None
     assert refreshed_version.extracted_text is not None
@@ -203,7 +206,8 @@ def test_pipeline_parse_failure_marks_job_and_document_failed(
     monkeypatch.setattr(document_tasks, "get_session_factory", lambda: task_session_factory)
     monkeypatch.setattr(document_tasks, "get_object_storage_service", lambda: storage)
 
-    document_tasks.parse_document_task.run(str(job.id))
+    with pytest.raises(AppError):
+        document_tasks.parse_document_task.run(str(job.id))
 
     db_session.expire_all()
     refreshed_job = db_session.get(AnalysisJob, job.id)

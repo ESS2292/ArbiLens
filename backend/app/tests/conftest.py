@@ -42,7 +42,7 @@ class FakeObjectStorageService(ObjectStorageService):
 @pytest.fixture()
 def db_session() -> Generator[Session, None, None]:
     os.environ["MAX_UPLOAD_SIZE_BYTES"] = "1024"
-    os.environ["JWT_SECRET_KEY"] = "test-secret-key"
+    os.environ["JWT_SECRET_KEY"] = "test-secret-key-at-least-32-bytes"
     get_settings.cache_clear()
     get_engine.cache_clear()
     get_session_factory.cache_clear()

@@ -234,8 +234,10 @@ class DocumentService:
         except Exception:
             self.session.rollback()
             if should_cleanup_storage and storage_key is not None and self.storage_service is not None:
+                delete_object = getattr(self.storage_service, "delete_object", None)
                 try:
-                    self.storage_service.delete_object(storage_key)
+                    if callable(delete_object):
+                        delete_object(storage_key)
                 except AppError:
                     logger.exception("Failed to clean up uploaded object", extra={"storage_key": storage_key})
             raise
