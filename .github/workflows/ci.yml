@@ -6,9 +6,22 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
 
     steps:
       - name: Check out repository
@@ -18,12 +31,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
 
       - name: Install backend dependencies
         working-directory: backend
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[dev]
+          pip install -e '.[dev]'
 
       - name: Compile backend modules
         working-directory: backend
@@ -31,10 +46,16 @@ jobs:
 
       - name: Run backend tests
         working-directory: backend
-        run: pytest app/tests
+        run: python -m pytest app/tests
 
   frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
       - name: Check out repository
@@ -58,3 +79,7 @@ jobs:
       - name: Run frontend tests
         working-directory: frontend
         run: npm test
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
