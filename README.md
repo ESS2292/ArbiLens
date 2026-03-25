@@ -56,8 +56,10 @@ Verified directly in this repository:
 
 Not verified in this repository snapshot:
 
-- browser-level end-to-end UI automation
+- browser-level end-to-end UI automation in CI
 - a live production deployment target
+
+There is now a browser-level Playwright path in `frontend/e2e/auth-upload-results.spec.ts`, but it is intended as a local verification path first and is not yet part of CI.
 
 ## Architecture
 
@@ -82,6 +84,7 @@ More detail: `docs/architecture.md`
 
 Related engineering notes:
 
+- `docs/adr-productionization-next.md`
 - `docs/design-decisions.md`
 - `docs/reliability.md`
 
@@ -235,6 +238,14 @@ npm install
 npm test
 ```
 
+Browser-level e2e:
+
+```bash
+cd frontend
+npx playwright install chromium
+npm run test:e2e
+```
+
 Useful backend test areas already covered:
 
 - auth and protected routes
@@ -248,6 +259,7 @@ Useful backend test areas already covered:
 - reports
 - comparisons
 - workflow happy path and failure paths
+- one browser-level login -> upload -> completed-results path with Playwright-backed API mocking
 
 ## Developer Setup
 
@@ -275,6 +287,8 @@ Additional setup notes: `docs/development.md`
 Operational and deployment notes: `docs/deployment.md`
 
 Reliability and failure-mode notes: `docs/reliability.md`
+
+Productionization priorities: `docs/adr-productionization-next.md`
 
 ## API Notes
 
@@ -335,6 +349,7 @@ The repository includes deployment-oriented Dockerfiles and local Compose config
 
 Deployment notes:
 
+- `docs/adr-productionization-next.md`
 - `docs/architecture.md`
 - `docs/design-decisions.md`
 - `docs/deployment.md`

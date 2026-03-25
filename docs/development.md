@@ -99,6 +99,24 @@ npm install
 npm test
 ```
 
+Browser-level e2e:
+
+```bash
+cd frontend
+npx playwright install chromium
+npm run test:e2e
+```
+
+The current e2e path covers:
+
+- sign in
+- dashboard load
+- upload form flow
+- navigation to document results
+- completed summary, clause, and risk rendering
+
+It uses Playwright with browser-level API mocking so the UI flow is exercised in a real browser without requiring a fully running backend stack.
+
 ## Useful Development Checks
 
 Compile backend modules:

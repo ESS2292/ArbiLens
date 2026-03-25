@@ -162,5 +162,6 @@ The architecture is realistic, but still incomplete in several areas:
 
 Related docs:
 
+- `docs/adr-productionization-next.md`
 - `docs/design-decisions.md`
 - `docs/reliability.md`

@@ -153,7 +153,7 @@ export function ComparisonView({ token }: { token: string }) {
                 <article key={`${risk.category}-${risk.title}`} style={{ borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
                   <strong>{risk.title}</strong>
                   <div style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                    {risk.change_type.replaceAll("_", " ")} | {risk.left_severity ?? "n/a"} {risk.left_score ?? "-"} -> {risk.right_severity ?? "n/a"} {risk.right_score ?? "-"}
+                    {risk.change_type.replaceAll("_", " ")} | {risk.left_severity ?? "n/a"} {risk.left_score ?? "-"} {"->"} {risk.right_severity ?? "n/a"} {risk.right_score ?? "-"}
                   </div>
                   <p style={{ margin: "8px 0 0", color: "var(--text-muted)" }}>{risk.explanation}</p>
                 </article>
