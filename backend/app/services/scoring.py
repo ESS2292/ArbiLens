@@ -213,6 +213,8 @@ class DeterministicRiskScoringService:
         clause: Clause | None,
     ) -> list[dict[str, object]]:
         if clause is None:
+            # Document-level risks still need a stable citation target so summary and UI
+            # layers can remain traceable even when no specific clause was detected.
             first_chunk = min(document_version.chunks, key=lambda chunk: chunk.chunk_index, default=None)
             if first_chunk is not None:
                 citation = SourceCitation(

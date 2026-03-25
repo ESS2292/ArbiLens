@@ -138,6 +138,9 @@ class ClauseExtractionService:
                 source_method="ai",
             )
             for item in response.clauses
+            # AI candidates are only accepted when they can be tied back to the exact
+            # chunk being processed. That keeps persisted clauses auditable and avoids
+            # "helpful" model paraphrases becoming source text.
             if self._candidate_matches_chunk(item, chunk)
         ]
 
@@ -166,6 +169,8 @@ class ClauseExtractionService:
             return False
         normalized_chunk = " ".join(chunk.text.split()).lower()
         normalized_extract = " ".join(candidate.extracted_text.split()).lower()
+        # Persist only spans that are grounded in the chunk text itself; otherwise the
+        # clause may be a model summary rather than an auditable extraction.
         if normalized_extract not in normalized_chunk:
             logger.warning(
                 "Discarding AI clause candidate whose text is not grounded in source chunk",

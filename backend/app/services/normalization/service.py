@@ -68,6 +68,7 @@ class DocumentNormalizationService:
                 if rebuilt and rebuilt[-1] != "":
                     rebuilt.append("")
                 continue
+            # Preserve legal numbering while still repairing parser-introduced line wraps.
             if rebuilt and rebuilt[-1].endswith("-") and stripped[:1].islower():
                 rebuilt[-1] = f"{rebuilt[-1][:-1]}{stripped.lstrip()}"
                 continue
@@ -88,6 +89,8 @@ class DocumentNormalizationService:
             if candidate:
                 frequency[candidate] = frequency.get(candidate, 0) + 1
 
+        # Repeated short lines are usually headers, footers, or page markers rather than
+        # substantive contract text.
         return [
             line
             for line in lines
@@ -137,6 +140,8 @@ class DocumentNormalizationService:
 
             for paragraph in paragraphs or [section.text]:
                 proposed = "\n\n".join([*current_parts, paragraph]).strip()
+                # Chunk boundaries are kept paragraph-aligned where possible so the AI
+                # layer sees coherent legal sections instead of arbitrary text slices.
                 if current_parts and len(proposed) > max_chars:
                     chunk_text = "\n\n".join(current_parts).strip()
                     chunks.append(

@@ -48,6 +48,8 @@ def _sanitize_task_error(exc: Exception) -> tuple[str, str]:
 
 
 def _maybe_retry(task: Task, exc: Exception, stage: str) -> None:
+    # Only retry failures that are plausibly transient. Validation and contract-shape
+    # errors should fail the job deterministically instead of looping in the queue.
     if isinstance(exc, AppError) and exc.code not in {"storage_read_error", "storage_error"}:
         return
     if task.request.retries >= task.max_retries:
@@ -102,6 +104,9 @@ def parse_document_task(self, job_id: str) -> str:
         job = _get_job(session, job_id)
         if job.status == JobStatus.completed:
             return job_id
+        # Parsing can be re-entered after worker retries or partial pipeline recovery.
+        # If extracted text already exists and the job has moved past parsing, keep the
+        # pipeline idempotent by short-circuiting instead of duplicating artifacts.
         if job.document_version.extracted_text is not None and job.current_stage in {
             "parsed",
             "normalizing",
@@ -190,6 +195,8 @@ def normalize_document_task(self, job_id: str) -> str:
             stage="normalizing",
             increment_retry=self.request.retries > 0,
         )
+        # Re-normalization must replace downstream artifacts in one step so later tasks
+        # never see old chunks, clauses, or risks mixed with new ones.
         job_service.clear_artifacts_for_reprocessing(job)
         session.commit()
 
