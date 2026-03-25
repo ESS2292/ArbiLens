@@ -139,6 +139,8 @@ class ReportService:
             write_line(f"- {issue.title} ({issue.severity}, score {issue.score})")
             write_line(f"  Rationale: {issue.rationale}", gap=12)
             write_line(f"  Recommendation: {issue.recommendation}", gap=12)
+            # Summary citations are typed models in the normal path, but this
+            # fallback keeps report rendering resilient to older serialized data.
             citation = issue.citations[0] if issue.citations else {}
             clause_id = citation.clause_id if hasattr(citation, "clause_id") else citation.get("clause_id", "n/a")
             page_start = citation.page_start if hasattr(citation, "page_start") else citation.get("page_start", "?")

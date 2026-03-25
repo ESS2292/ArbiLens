@@ -162,6 +162,8 @@ class DocumentService:
             self.session.add(next_document)
             self.session.flush()
 
+            # Persist the original artifact before creating downstream records so
+            # every job/version points at a concrete object-storage key.
             storage_key = (
                 f"organizations/{current_user.organization_id}/documents/{next_document.id}/"
                 f"versions/1/{filename}"
@@ -203,6 +205,8 @@ class DocumentService:
                 current_stage="queued",
             )
             self.session.add(job)
+            # Commit the job and version before enqueueing work so worker retries
+            # can always recover from durable pipeline state.
             self.session.commit()
             should_cleanup_storage = False
             self.session.refresh(version)
@@ -234,6 +238,8 @@ class DocumentService:
         except Exception:
             self.session.rollback()
             if should_cleanup_storage and storage_key is not None and self.storage_service is not None:
+                # Cleanup is best-effort because some storage doubles used in
+                # tests only implement uploads, not deletes.
                 delete_object = getattr(self.storage_service, "delete_object", None)
                 try:
                     if callable(delete_object):
