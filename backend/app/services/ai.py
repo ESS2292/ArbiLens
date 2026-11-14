@@ -100,7 +100,14 @@ class OpenAIResponsesService:
                     },
                 )
                 try:
-                    return self.client.responses.create(
+                    client = self.client
+                    if client is None:
+                        raise AppError(
+                            "OpenAI client is not available.",
+                            status_code=503,
+                            code="ai_not_configured",
+                        )
+                    return client.responses.create(
                         model=self.settings.openai_model,
                         input=[
                             {"role": "system", "content": [{"type": "input_text", "text": system_prompt}]},

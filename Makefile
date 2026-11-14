@@ -27,7 +27,10 @@ frontend:
 	cd frontend && npm install && npm run dev
 
 test-backend:
-	cd backend && . .venv/bin/activate && pytest app/tests
+	cd backend && . .venv/bin/activate && pytest
+
+eval:
+	cd backend && python -m app.cli eval --check
 
 test-frontend:
 	cd frontend && npm test

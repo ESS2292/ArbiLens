@@ -28,10 +28,10 @@ def _build_error_payload(
     message: str,
     details: list[dict[str, str]] | None = None,
 ) -> dict[str, object]:
-    payload: dict[str, object] = {"error": {"code": code, "message": message}}
+    error: dict[str, object] = {"code": code, "message": message}
     if details is not None:
-        payload["error"]["details"] = details
-    return payload
+        error["details"] = details
+    return {"error": error}
 
 
 def register_exception_handlers(app: FastAPI) -> None:

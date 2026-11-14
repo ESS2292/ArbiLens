@@ -1,4 +1,5 @@
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 
 from app.services.parsing.base import ParsedDocument, ParsedSection
@@ -94,7 +95,7 @@ class DocumentNormalizationService:
         # substantive contract text.
         return [line for line in lines if not self._is_repeated_noise(line.strip(), frequency)]
 
-    def _line_frequency(self, texts: list[str] | tuple[str, ...] | object) -> dict[str, int]:
+    def _line_frequency(self, texts: Iterable[str]) -> dict[str, int]:
         frequency: dict[str, int] = {}
         for text in texts:
             for line in text.splitlines():

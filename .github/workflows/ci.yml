@@ -44,9 +44,23 @@ jobs:
         working-directory: backend
         run: python -m compileall app alembic
 
+      - name: Lint and format
+        working-directory: backend
+        run: |
+          ruff check app
+          ruff format --check app
+
+      - name: Type check
+        working-directory: backend
+        run: mypy app
+
       - name: Run backend tests
         working-directory: backend
-        run: python -m pytest app/tests
+        run: python -m pytest
+
+      - name: Run the offline evaluation gate
+        working-directory: backend
+        run: arbilens eval --check
 
   frontend:
     runs-on: ubuntu-latest
