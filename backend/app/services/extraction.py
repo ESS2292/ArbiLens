@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
+from app.engine.taxonomy import CLAUSE_MARKERS
 from app.models.clause import Clause
 from app.models.document_chunk import DocumentChunk
 from app.models.document_version import DocumentVersion
@@ -14,22 +15,9 @@ from app.services.ai import OpenAIResponsesService
 
 logger = logging.getLogger(__name__)
 
+# The marker list lives in the engine so the API and the offline eval cannot drift.
 CLAUSE_TAXONOMY: dict[ClauseType, tuple[str, ...]] = {
-    ClauseType.indemnification: ("indemn", "hold harmless"),
-    ClauseType.limitation_of_liability: ("limitation of liability", "liability cap", "cap on liability"),
-    ClauseType.termination: ("termination", "terminate"),
-    ClauseType.auto_renewal: ("auto renewal", "automatic renewal", "renewal term"),
-    ClauseType.confidentiality: ("confidentiality", "confidential information", "non-disclosure"),
-    ClauseType.assignment: ("assignment", "assign this agreement"),
-    ClauseType.payment_terms: ("payment terms", "fees", "invoices", "payment due"),
-    ClauseType.dispute_resolution: ("dispute resolution", "arbitration", "venue", "exclusive jurisdiction"),
-    ClauseType.governing_law: ("governing law", "laws of"),
-    ClauseType.ip_ownership: ("intellectual property", "ownership", "work product"),
-    ClauseType.data_protection: ("data protection", "privacy", "personal data", "security measures"),
-    ClauseType.warranties: ("warrant", "as is", "disclaimer"),
-    ClauseType.force_majeure: ("force majeure", "acts of god"),
-    ClauseType.sla: ("service level", "uptime", "availability", "response time"),
-    ClauseType.audit_rights: ("audit", "inspection rights", "books and records"),
+    ClauseType(name): markers for name, markers in CLAUSE_MARKERS.items()
 }
 
 

@@ -1,11 +1,14 @@
 import logging
 from dataclasses import dataclass
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from app.engine.risks import evaluate_risk_flags
+from app.engine.types import ClauseView
 from app.models.clause import Clause
 from app.models.document_version import DocumentVersion
-from app.models.enums import ClauseType, RiskScope, RiskSeverity
+from app.models.enums import RiskScope, RiskSeverity
 from app.models.risk import Risk
 from app.schemas.ai import RiskExplanationSchema
 from app.schemas.references import SourceCitation
@@ -31,7 +34,7 @@ class DeterministicRiskScoringService:
         self.session = session
         self.ai_service = ai_service
 
-    def analyze_and_persist(self, document_version: DocumentVersion, analysis_job_id: str) -> list[Risk]:
+    def analyze_and_persist(self, document_version: DocumentVersion, analysis_job_id: UUID) -> list[Risk]:
         for risk in list(document_version.risks):
             self.session.delete(risk)
         self.session.flush()
@@ -66,122 +69,23 @@ class DeterministicRiskScoringService:
 
     def _evaluate_rules(self, document_version: DocumentVersion) -> list[RiskRuleResult]:
         clauses = list(document_version.clauses)
-        results: list[RiskRuleResult] = []
-
-        liability_clause = self._find_clause(clauses, ClauseType.limitation_of_liability)
-        if liability_clause is None:
-            results.append(
-                RiskRuleResult(
-                    category="liability",
-                    rule_code="missing_liability_cap",
-                    severity=RiskSeverity.high,
-                    score=80,
-                    title="No limitation of liability clause detected",
-                    rationale="A liability cap was not found in the extracted clauses.",
-                    recommendation="Add a mutual limitation of liability clause with explicit caps and exclusions.",
-                    clause=None,
-                )
+        views = [
+            ClauseView(clause_type=clause.clause_type.value, text=clause.text, confidence=clause.confidence)
+            for clause in clauses
+        ]
+        return [
+            RiskRuleResult(
+                category=finding.category,
+                rule_code=finding.rule_code,
+                severity=RiskSeverity(finding.severity),
+                score=finding.score,
+                title=finding.title,
+                rationale=finding.rationale,
+                recommendation=finding.recommendation,
+                clause=clauses[finding.clause_index] if finding.clause_index is not None else None,
             )
-        elif "unlimited" in liability_clause.text.lower() or "without limitation" in liability_clause.text.lower():
-            results.append(
-                RiskRuleResult(
-                    category="liability",
-                    rule_code="uncapped_liability",
-                    severity=RiskSeverity.critical,
-                    score=95,
-                    title="Potential uncapped liability",
-                    rationale="The liability language appears to allow uncapped or open-ended exposure.",
-                    recommendation=(
-                        "Cap liability to a negotiated multiple of fees and carve out only limited exceptions."
-                    ),
-                    clause=liability_clause,
-                )
-            )
-
-        indemnity_clause = self._find_clause(clauses, ClauseType.indemnification)
-        if indemnity_clause and self._is_one_sided(indemnity_clause.text):
-            results.append(
-                RiskRuleResult(
-                    category="indemnity",
-                    rule_code="one_sided_indemnity",
-                    severity=RiskSeverity.high,
-                    score=78,
-                    title="One-sided indemnification language",
-                    rationale="The indemnity clause appears to allocate obligations primarily to one party.",
-                    recommendation="Make indemnity obligations mutual or narrow triggers to specific breaches.",
-                    clause=indemnity_clause,
-                )
-            )
-
-        termination_clause = self._find_clause(clauses, ClauseType.termination)
-        if (
-            termination_clause
-            and "for convenience" in termination_clause.text.lower()
-            and self._is_unilateral(termination_clause.text)
-        ):
-            results.append(
-                RiskRuleResult(
-                    category="termination",
-                    rule_code="unilateral_termination",
-                    severity=RiskSeverity.high,
-                    score=74,
-                    title="Unilateral termination for convenience",
-                    rationale="Termination language appears to favor only one side.",
-                    recommendation="Require mutual termination rights or add notice and cure protections.",
-                    clause=termination_clause,
-                )
-            )
-
-        confidentiality_clause = self._find_clause(clauses, ClauseType.confidentiality)
-        if confidentiality_clause is None:
-            results.append(
-                RiskRuleResult(
-                    category="confidentiality",
-                    rule_code="missing_confidentiality",
-                    severity=RiskSeverity.high,
-                    score=72,
-                    title="Missing confidentiality protections",
-                    rationale="No confidentiality clause was detected in the contract text.",
-                    recommendation="Add confidentiality obligations, permitted disclosures, and survival terms.",
-                    clause=None,
-                )
-            )
-
-        data_protection_clause = self._find_clause(clauses, ClauseType.data_protection)
-        if data_protection_clause is None or "reasonable security" not in data_protection_clause.text.lower():
-            results.append(
-                RiskRuleResult(
-                    category="data_protection",
-                    rule_code="weak_data_protection",
-                    severity=RiskSeverity.medium,
-                    score=60,
-                    title="Weak data protection language",
-                    rationale=(
-                        "The data protection language is missing or does not clearly describe security obligations."
-                    ),
-                    recommendation="Add concrete security, incident response, and subprocesser obligations.",
-                    clause=data_protection_clause,
-                )
-            )
-
-        dispute_clause = self._find_clause(clauses, ClauseType.dispute_resolution)
-        if dispute_clause and any(
-            term in dispute_clause.text.lower() for term in ("exclusive venue", "vendor's courts", "vendor courts")
-        ):
-            results.append(
-                RiskRuleResult(
-                    category="dispute_resolution",
-                    rule_code="unfavorable_dispute_language",
-                    severity=RiskSeverity.medium,
-                    score=58,
-                    title="Potentially unfavorable dispute language",
-                    rationale="The dispute clause appears to impose a venue that may not be balanced.",
-                    recommendation="Negotiate a neutral forum, venue, or arbitration mechanism.",
-                    clause=dispute_clause,
-                )
-            )
-
-        return results
+            for finding in evaluate_risk_flags(views)
+        ]
 
     def _explain_risk(self, result: RiskRuleResult) -> RiskExplanationSchema:
         user_prompt = (
@@ -253,17 +157,3 @@ class DeterministicRiskScoringService:
             reference_type="clause",
         )
         return [citation.model_dump()]
-
-    def _find_clause(self, clauses: list[Clause], clause_type: ClauseType) -> Clause | None:
-        candidates = [clause for clause in clauses if clause.clause_type == clause_type]
-        if not candidates:
-            return None
-        return max(candidates, key=lambda clause: clause.confidence)
-
-    def _is_one_sided(self, text: str) -> bool:
-        lowered = text.lower()
-        return "customer shall indemnify" in lowered or "client shall indemnify" in lowered
-
-    def _is_unilateral(self, text: str) -> bool:
-        lowered = text.lower()
-        return "company may terminate" in lowered or "provider may terminate" in lowered
