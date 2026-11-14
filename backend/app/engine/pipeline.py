@@ -11,7 +11,7 @@ from app.engine.rerank import Reranker
 from app.engine.retrieve import retrieve
 from app.engine.risks import evaluate_risk_flags
 from app.engine.strategy import RetrievalStrategy
-from app.engine.types import ClauseView, DocumentAnalysis, GroundedAnswer, Hit
+from app.engine.types import Chunk, ClauseView, DocumentAnalysis, GroundedAnswer, Hit
 
 
 def analyze_document(text: str, strategy: RetrievalStrategy) -> DocumentAnalysis:
@@ -41,11 +41,33 @@ def ask_document(
     llm: LLMProvider | None = None,
     reranker: Reranker | None = None,
 ) -> GroundedAnswer:
-    """Retrieve clause spans and return an answer whose quotes are exact slices."""
+    """Chunk, retrieve, and return an answer whose quotes are exact slices."""
+
+    return ask_over_chunks(
+        text,
+        chunk_document(text, strategy),
+        question,
+        strategy,
+        embedder=embedder,
+        llm=llm,
+        reranker=reranker,
+    )
+
+
+def ask_over_chunks(
+    text: str,
+    chunks: Sequence[Chunk],
+    question: str,
+    strategy: RetrievalStrategy,
+    *,
+    embedder: EmbeddingProvider | None = None,
+    llm: LLMProvider | None = None,
+    reranker: Reranker | None = None,
+) -> GroundedAnswer:
+    """Answer from chunks that were already cut, such as the spans stored at upload."""
 
     resolved_embedder = embedder if embedder is not None else default_embedder()
     resolved_llm = llm if llm is not None else default_llm()
-    chunks = chunk_document(text, strategy)
     hits = retrieve(
         chunks,
         question,

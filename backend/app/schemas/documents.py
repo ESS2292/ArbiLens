@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.enums import DocumentStatus, JobStatus
 
@@ -23,6 +23,25 @@ class DocumentUploadResponse(BaseModel):
     document_version_id: UUID
     job_id: UUID
     job_status: JobStatus
+
+
+class AskRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=2000)
+
+
+class CitationRead(BaseModel):
+    char_start: int
+    char_end: int
+    text: str
+    section_title: str | None = None
+
+
+class AskResponse(BaseModel):
+    answer: str
+    grounded: bool
+    provider: str
+    strategy: str
+    citations: list[CitationRead]
 
 
 class DocumentStatusResponse(BaseModel):

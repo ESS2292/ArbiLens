@@ -2,6 +2,8 @@ import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 
+from app.engine.chunking import chunk_clause_aware
+from app.engine.strategy import upgraded_strategy
 from app.services.parsing.base import ParsedDocument, ParsedSection
 
 HEADING_PATTERN = re.compile(
@@ -55,15 +57,75 @@ class DocumentNormalizationService:
                 )
             ]
 
-        cleaned_text = "\n\n".join(
-            f"{section.heading}\n{section.text}" if section.heading else section.text for section in cleaned_sections
-        ).strip()
+        cleaned_text, page_ranges = self._assemble(cleaned_sections)
 
         return NormalizedDocument(
             cleaned_text=cleaned_text,
             sections=cleaned_sections,
-            chunks=self._chunk_sections(cleaned_sections),
+            chunks=self._chunk_cleaned_text(cleaned_text, page_ranges),
         )
+
+    def _assemble(self, sections: list[ParsedSection]) -> tuple[str, list[tuple[int, int, int | None, int | None]]]:
+        parts: list[str] = []
+        ranges: list[tuple[int, int, int | None, int | None]] = []
+        cursor = 0
+        for index, section in enumerate(sections):
+            if index:
+                cursor += 2
+            piece = f"{section.heading}\n{section.text}" if section.heading else section.text
+            start = cursor
+            cursor += len(piece)
+            parts.append(piece)
+            ranges.append((start, cursor, section.page_start, section.page_end))
+        raw = "\n\n".join(parts)
+        cleaned = raw.strip()
+        offset = raw.find(cleaned) if cleaned else 0
+        adjusted = [
+            (start - offset, end - offset, page_start, page_end)
+            for start, end, page_start, page_end in ranges
+            if end > offset and start - offset < len(cleaned)
+        ]
+        return cleaned, adjusted
+
+    def _chunk_cleaned_text(
+        self,
+        cleaned_text: str,
+        page_ranges: list[tuple[int, int, int | None, int | None]],
+    ) -> list[ChunkedSection]:
+        """Chunk with the same clause-aware splitter the offline engine uses."""
+
+        if not cleaned_text:
+            return []
+        chunks = chunk_clause_aware(cleaned_text, max_chars=upgraded_strategy().clause_max_chars)
+        built: list[ChunkedSection] = []
+        for index, chunk in enumerate(chunks):
+            page_start, page_end = self._pages_for(chunk.char_start, chunk.char_end, page_ranges)
+            built.append(
+                self._build_chunk(
+                    chunk_index=index,
+                    section_title=chunk.section_title,
+                    page_start=page_start,
+                    page_end=page_end,
+                    text=chunk.text,
+                    char_start=chunk.char_start,
+                )
+            )
+        return built
+
+    def _pages_for(
+        self,
+        start: int,
+        end: int,
+        page_ranges: list[tuple[int, int, int | None, int | None]],
+    ) -> tuple[int | None, int | None]:
+        overlapping = [
+            (page_start, page_end)
+            for range_start, range_end, page_start, page_end in page_ranges
+            if start < range_end and end > range_start
+        ]
+        if not overlapping:
+            return None, None
+        return overlapping[0][0], overlapping[-1][1]
 
     def _clean_text(self, text: str, *, frequency: dict[str, int]) -> str:
         lines = [line.rstrip() for line in text.splitlines()]
@@ -136,56 +198,6 @@ class DocumentNormalizationService:
             return True
         return stripped.isupper() and 3 <= len(stripped) <= 120
 
-    def _chunk_sections(self, sections: list[ParsedSection]) -> list[ChunkedSection]:
-        chunks: list[ChunkedSection] = []
-        chunk_index = 0
-        char_cursor = 0
-        max_chars = 1800
-
-        for section in sections:
-            title = section.heading or self._detect_heading_from_text(section.text)
-            paragraphs = [paragraph.strip() for paragraph in section.text.split("\n\n") if paragraph.strip()]
-            current_parts: list[str] = []
-
-            for paragraph in paragraphs or [section.text]:
-                proposed = "\n\n".join([*current_parts, paragraph]).strip()
-                # Chunk boundaries are kept paragraph-aligned where possible so the AI
-                # layer sees coherent legal sections instead of arbitrary text slices.
-                if current_parts and len(proposed) > max_chars:
-                    chunk_text = "\n\n".join(current_parts).strip()
-                    chunks.append(
-                        self._build_chunk(
-                            chunk_index=chunk_index,
-                            section_title=title,
-                            page_start=section.page_start,
-                            page_end=section.page_end,
-                            text=chunk_text,
-                            char_start=char_cursor,
-                        )
-                    )
-                    char_cursor += len(chunk_text)
-                    chunk_index += 1
-                    current_parts = [paragraph]
-                else:
-                    current_parts.append(paragraph)
-
-            if current_parts:
-                chunk_text = "\n\n".join(current_parts).strip()
-                chunks.append(
-                    self._build_chunk(
-                        chunk_index=chunk_index,
-                        section_title=title,
-                        page_start=section.page_start,
-                        page_end=section.page_end,
-                        text=chunk_text,
-                        char_start=char_cursor,
-                    )
-                )
-                char_cursor += len(chunk_text)
-                chunk_index += 1
-
-        return chunks
-
     def _build_chunk(
         self,
         *,
@@ -209,7 +221,3 @@ class DocumentNormalizationService:
             char_start=char_start,
             char_end=char_start + char_count,
         )
-
-    def _detect_heading_from_text(self, text: str) -> str | None:
-        first_line = text.splitlines()[0].strip() if text.splitlines() else ""
-        return first_line if self._looks_like_heading(first_line) else None
