@@ -1,6 +1,7 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, File, UploadFile, status
 from sqlalchemy.orm import Session
-from uuid import UUID
 
 from app.api.dependencies.auth import get_current_active_user
 from app.db.session import get_db_session

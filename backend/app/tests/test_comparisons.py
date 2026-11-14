@@ -1,13 +1,13 @@
-from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from app.models.analysis_job import AnalysisJob
 from app.models.clause import Clause
 from app.models.document import Document
 from app.models.document_version import DocumentVersion
 from app.models.enums import ClauseType, DocumentStatus, JobStatus, RiskScope, RiskSeverity
-from app.models.user import User
 from app.models.risk import Risk
+from app.models.user import User
 from app.tests.conftest import register_user
 
 

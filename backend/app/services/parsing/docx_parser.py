@@ -1,8 +1,8 @@
 from io import BytesIO
 
 from docx import Document as DocxDocument
-from docx.oxml.text.paragraph import CT_P
 from docx.oxml.table import CT_Tbl
+from docx.oxml.text.paragraph import CT_P
 from docx.table import Table
 from docx.text.paragraph import Paragraph
 
@@ -37,9 +37,7 @@ class DocxParsingService:
                 full_text_parts.append(text)
                 if is_heading:
                     if current_lines:
-                        sections.append(
-                            ParsedSection(heading=current_heading, text="\n".join(current_lines).strip())
-                        )
+                        sections.append(ParsedSection(heading=current_heading, text="\n".join(current_lines).strip()))
                         current_lines = []
                     current_heading = text
                     continue

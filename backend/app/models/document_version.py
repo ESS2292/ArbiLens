@@ -8,9 +8,7 @@ from app.models.mixins import TimestampMixin, UUIDPrimaryKeyMixin
 
 class DocumentVersion(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "document_versions"
-    __table_args__ = (
-        UniqueConstraint("document_id", "version_number", name="uq_document_versions_number"),
-    )
+    __table_args__ = (UniqueConstraint("document_id", "version_number", name="uq_document_versions_number"),)
 
     document_id: Mapped[str] = mapped_column(ForeignKey("documents.id"), nullable=False, index=True)
     uploaded_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)

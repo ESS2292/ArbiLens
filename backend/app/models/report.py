@@ -12,7 +12,9 @@ class Report(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id"), nullable=False, index=True)
     document_id: Mapped[str] = mapped_column(ForeignKey("documents.id"), nullable=False, index=True)
-    document_version_id: Mapped[str | None] = mapped_column(ForeignKey("document_versions.id"), nullable=True, index=True)
+    document_version_id: Mapped[str | None] = mapped_column(
+        ForeignKey("document_versions.id"), nullable=True, index=True
+    )
     analysis_job_id: Mapped[str | None] = mapped_column(ForeignKey("analysis_jobs.id"), nullable=True, index=True)
     created_by_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     storage_key: Mapped[str] = mapped_column(String(512), nullable=False, unique=True)

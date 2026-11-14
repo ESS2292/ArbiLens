@@ -80,7 +80,9 @@ def test_risk_rubric_flags_uncapped_liability_as_critical(db_session: Session) -
     db_session.add(clause)
     db_session.flush()
 
-    risks = DeterministicRiskScoringService(db_session, ai_service=_FakeAIService()).analyze_and_persist(version, job.id)
+    risks = DeterministicRiskScoringService(db_session, ai_service=_FakeAIService()).analyze_and_persist(
+        version, job.id
+    )
     liability_risk = next(risk for risk in risks if risk.category == "liability")
 
     assert liability_risk.severity == RiskSeverity.critical
@@ -117,7 +119,9 @@ def test_risk_scoring_aggregates_multiple_findings(db_session: Session) -> None:
     )
     db_session.flush()
 
-    risks = DeterministicRiskScoringService(db_session, ai_service=_FakeAIService()).analyze_and_persist(version, job.id)
+    risks = DeterministicRiskScoringService(db_session, ai_service=_FakeAIService()).analyze_and_persist(
+        version, job.id
+    )
 
     categories = {risk.category for risk in risks}
     assert "indemnity" in categories
@@ -128,7 +132,9 @@ def test_risk_scoring_aggregates_multiple_findings(db_session: Session) -> None:
 def test_document_scope_risks_receive_document_context_citations(db_session: Session) -> None:
     version, job = _build_version_with_clauses(db_session)
 
-    risks = DeterministicRiskScoringService(db_session, ai_service=_FakeAIService()).analyze_and_persist(version, job.id)
+    risks = DeterministicRiskScoringService(db_session, ai_service=_FakeAIService()).analyze_and_persist(
+        version, job.id
+    )
     confidentiality_risk = next(risk for risk in risks if risk.category == "confidentiality")
 
     assert confidentiality_risk.citations
@@ -169,4 +175,7 @@ def test_ai_narrative_cannot_override_deterministic_recommendation_or_score(db_s
     assert liability_risk.summary == "AI summary only"
     assert liability_risk.score == 95
     assert liability_risk.rationale == "The liability language appears to allow uncapped or open-ended exposure."
-    assert liability_risk.recommendation == "Cap liability to a negotiated multiple of fees and carve out only limited exceptions."
+    assert (
+        liability_risk.recommendation
+        == "Cap liability to a negotiated multiple of fees and carve out only limited exceptions."
+    )

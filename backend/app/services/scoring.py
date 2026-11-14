@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
@@ -91,7 +91,9 @@ class DeterministicRiskScoringService:
                     score=95,
                     title="Potential uncapped liability",
                     rationale="The liability language appears to allow uncapped or open-ended exposure.",
-                    recommendation="Cap liability to a negotiated multiple of fees and carve out only limited exceptions.",
+                    recommendation=(
+                        "Cap liability to a negotiated multiple of fees and carve out only limited exceptions."
+                    ),
                     clause=liability_clause,
                 )
             )
@@ -112,7 +114,11 @@ class DeterministicRiskScoringService:
             )
 
         termination_clause = self._find_clause(clauses, ClauseType.termination)
-        if termination_clause and "for convenience" in termination_clause.text.lower() and self._is_unilateral(termination_clause.text):
+        if (
+            termination_clause
+            and "for convenience" in termination_clause.text.lower()
+            and self._is_unilateral(termination_clause.text)
+        ):
             results.append(
                 RiskRuleResult(
                     category="termination",
@@ -150,14 +156,18 @@ class DeterministicRiskScoringService:
                     severity=RiskSeverity.medium,
                     score=60,
                     title="Weak data protection language",
-                    rationale="The data protection language is missing or does not clearly describe security obligations.",
+                    rationale=(
+                        "The data protection language is missing or does not clearly describe security obligations."
+                    ),
                     recommendation="Add concrete security, incident response, and subprocesser obligations.",
                     clause=data_protection_clause,
                 )
             )
 
         dispute_clause = self._find_clause(clauses, ClauseType.dispute_resolution)
-        if dispute_clause and any(term in dispute_clause.text.lower() for term in ("exclusive venue", "vendor's courts", "vendor courts")):
+        if dispute_clause and any(
+            term in dispute_clause.text.lower() for term in ("exclusive venue", "vendor's courts", "vendor courts")
+        ):
             results.append(
                 RiskRuleResult(
                     category="dispute_resolution",

@@ -1,6 +1,6 @@
+import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
-import logging
 
 from sqlalchemy.orm import Session
 
@@ -182,7 +182,11 @@ class ClauseExtractionService:
                 extra={"chunk_index": chunk.chunk_index},
             )
             return False
-        if candidate.page_start is not None and chunk.page_start is not None and candidate.page_start < chunk.page_start:
+        if (
+            candidate.page_start is not None
+            and chunk.page_start is not None
+            and candidate.page_start < chunk.page_start
+        ):
             return False
         if candidate.page_end is not None and chunk.page_end is not None and candidate.page_end > chunk.page_end:
             return False

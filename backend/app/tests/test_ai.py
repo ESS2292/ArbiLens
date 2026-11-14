@@ -21,7 +21,8 @@ class _FakeResponsesClient:
 def test_openai_structured_response_validation_accepts_valid_json() -> None:
     service = OpenAIResponsesService(
         client=_FakeResponsesClient(
-            '{"summary":"Risk summary","rationale":"Rule-based rationale","recommendation":"Mitigate it","confidence":0.8}'
+            '{"summary":"Risk summary","rationale":"Rule-based rationale",'
+            '"recommendation":"Mitigate it","confidence":0.8}'
         )
     )
 

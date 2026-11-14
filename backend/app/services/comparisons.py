@@ -23,19 +23,17 @@ class ComparisonService:
         right_version = self._latest_version(right)
 
         left_summary = DocumentSummaryService(self.session).get_summary(document_id=left.id, current_user=current_user)
-        right_summary = DocumentSummaryService(self.session).get_summary(document_id=right.id, current_user=current_user)
+        right_summary = DocumentSummaryService(self.session).get_summary(
+            document_id=right.id, current_user=current_user
+        )
 
         clause_differences = self._compare_clauses(left_version, right_version)
         risk_differences, new_risks = self._compare_risks(left_version, right_version)
         protections_removed = [
-            diff.clause_type
-            for diff in clause_differences
-            if diff.left_present and not diff.right_present
+            diff.clause_type for diff in clause_differences if diff.left_present and not diff.right_present
         ]
         protections_added = [
-            diff.clause_type
-            for diff in clause_differences
-            if not diff.left_present and diff.right_present
+            diff.clause_type for diff in clause_differences if not diff.left_present and diff.right_present
         ]
 
         return ComparisonResponse(
@@ -107,7 +105,9 @@ class ComparisonService:
             )
         return diffs
 
-    def _compare_risks(self, left: DocumentVersion, right: DocumentVersion) -> tuple[list[RiskDiffItem], list[RiskDiffItem]]:
+    def _compare_risks(
+        self, left: DocumentVersion, right: DocumentVersion
+    ) -> tuple[list[RiskDiffItem], list[RiskDiffItem]]:
         left_by_rule = {risk.deterministic_rule_code or risk.title: risk for risk in left.risks}
         right_by_rule = {risk.deterministic_rule_code or risk.title: risk for risk in right.risks}
         keys = sorted(set(left_by_rule) | set(right_by_rule))

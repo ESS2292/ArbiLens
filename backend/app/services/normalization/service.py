@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 from app.services.parsing.base import ParsedDocument, ParsedSection
 
-
 HEADING_PATTERN = re.compile(
     r"^(?:section|article|schedule|appendix|exhibit)?\s*(?:\d+(?:\.\d+)*)[\).\s-]+.+$",
     re.IGNORECASE,
@@ -32,9 +31,7 @@ class NormalizedDocument:
 
 class DocumentNormalizationService:
     def normalize(self, parsed_document: ParsedDocument) -> NormalizedDocument:
-        global_frequency = self._line_frequency(
-            section.text for section in parsed_document.sections if section.text
-        )
+        global_frequency = self._line_frequency(section.text for section in parsed_document.sections if section.text)
         cleaned_sections = [
             ParsedSection(
                 heading=self._normalize_heading(section.heading) if section.heading else None,
@@ -58,8 +55,7 @@ class DocumentNormalizationService:
             ]
 
         cleaned_text = "\n\n".join(
-            f"{section.heading}\n{section.text}" if section.heading else section.text
-            for section in cleaned_sections
+            f"{section.heading}\n{section.text}" if section.heading else section.text for section in cleaned_sections
         ).strip()
 
         return NormalizedDocument(
@@ -96,11 +92,7 @@ class DocumentNormalizationService:
     def _remove_repeated_noise(self, lines: list[str], *, frequency: dict[str, int]) -> list[str]:
         # Repeated short lines are usually headers, footers, or page markers rather than
         # substantive contract text.
-        return [
-            line
-            for line in lines
-            if not self._is_repeated_noise(line.strip(), frequency)
-        ]
+        return [line for line in lines if not self._is_repeated_noise(line.strip(), frequency)]
 
     def _line_frequency(self, texts: list[str] | tuple[str, ...] | object) -> dict[str, int]:
         frequency: dict[str, int] = {}

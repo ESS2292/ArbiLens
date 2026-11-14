@@ -1,7 +1,5 @@
 from sqlalchemy.orm import Session
 
-from app.schemas.risks import RiskRead
-from app.schemas.summary import DocumentSummaryResponse
 from app.models.analysis_job import AnalysisJob
 from app.models.clause import Clause
 from app.models.document import Document
@@ -10,6 +8,8 @@ from app.models.enums import ClauseType, DocumentStatus, JobStatus, Organization
 from app.models.organization import Organization
 from app.models.risk import Risk
 from app.models.user import User
+from app.schemas.risks import RiskRead
+from app.schemas.summary import DocumentSummaryResponse
 from app.services.summaries import DocumentSummaryService
 
 
@@ -131,9 +131,7 @@ def test_document_summary_aggregates_risks_and_clause_coverage(db_session: Sessi
         item for item in summary.clause_coverage_summary if item.clause_type == ClauseType.confidentiality
     )
     liability_coverage = next(
-        item
-        for item in summary.clause_coverage_summary
-        if item.clause_type == ClauseType.limitation_of_liability
+        item for item in summary.clause_coverage_summary if item.clause_type == ClauseType.limitation_of_liability
     )
     assert confidentiality_coverage.detected is False
     assert liability_coverage.detected is True
@@ -185,4 +183,7 @@ def test_risk_serialization_contract_uses_typed_citations(db_session: Session) -
     serialized = [RiskRead.model_validate(risk).model_dump(mode="json") for risk in risks]
 
     assert serialized[0]["citations"]
-    assert serialized[0]["citations"][0]["page_start"] is not None or serialized[0]["citations"][0]["reference_type"] == "document_context"
+    assert (
+        serialized[0]["citations"][0]["page_start"] is not None
+        or serialized[0]["citations"][0]["reference_type"] == "document_context"
+    )

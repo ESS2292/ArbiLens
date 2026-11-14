@@ -12,8 +12,8 @@ from app.db.session import get_session_factory
 from app.models.analysis_job import AnalysisJob
 from app.models.document_chunk import DocumentChunk
 from app.models.document_version import DocumentVersion
-from app.models.extracted_text import ExtractedText
 from app.models.enums import JobStatus
+from app.models.extracted_text import ExtractedText
 from app.services.extraction import ClauseExtractionService
 from app.services.jobs import AnalysisJobService
 from app.services.normalization.service import DocumentNormalizationService

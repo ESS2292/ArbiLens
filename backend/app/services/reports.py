@@ -1,6 +1,6 @@
+import logging
 from datetime import UTC, datetime
 from io import BytesIO
-import logging
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
@@ -132,7 +132,10 @@ class ReportService:
         write_line(f"Document: {document.filename}")
         write_line(f"Organization: {current_user.organization.name}")
         write_line(f"Overall risk score: {summary.overall_risk_score}")
-        write_line(f"Generated at: {summary.updated_at.isoformat() if hasattr(summary.updated_at, 'isoformat') else summary.updated_at}")
+        generated_at = summary.updated_at
+        if hasattr(generated_at, "isoformat"):
+            generated_at = generated_at.isoformat()
+        write_line(f"Generated at: {generated_at}")
         y -= 6
         write_line("Top Risks", size=12, gap=18)
         for issue in summary.top_issues:
