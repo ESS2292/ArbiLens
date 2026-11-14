@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from app.engine.answer import citation_offsets_match
 from app.engine.chunking import chunk_document
 from app.engine.embeddings import FakeEmbeddingProvider
+from app.engine.faithfulness import DeterministicFaithfulnessJudge, FaithfulnessJudge
 from app.engine.llm import FakeLLMProvider
 from app.engine.pipeline import analyze_document, ask_document
 from app.engine.retrieve import retrieve
@@ -31,11 +32,13 @@ class StrategyScore:
     """Headline metrics for one chunking and retrieval configuration."""
 
     name: str
+    retrieval_recall_at_1: float
     retrieval_recall_at_5: float
     retrieval_mrr: float
     extraction_micro_f1: float
     extraction_type_micro_f1: float
     citation_faithfulness: float
+    judge: str
     offset_integrity: float
     risk_flag_accuracy: float
     risk_flag_micro_f1: float
@@ -59,8 +62,10 @@ def run_evaluation(dataset: Dataset, strategies: Sequence[RetrievalStrategy] | N
     chosen = list(strategies) if strategies is not None else [STRATEGIES["baseline"], STRATEGIES["upgraded"]]
     embedder = FakeEmbeddingProvider()
     reader = FakeLLMProvider()
+    judge = DeterministicFaithfulnessJudge()
     scores = {
-        strategy.name: _score_strategy(dataset, strategy, embedder=embedder, reader=reader) for strategy in chosen
+        strategy.name: _score_strategy(dataset, strategy, embedder=embedder, reader=reader, judge=judge)
+        for strategy in chosen
     }
     return EvalReport(
         provider=embedder.name,
@@ -89,7 +94,9 @@ def _score_strategy(
     *,
     embedder: FakeEmbeddingProvider,
     reader: FakeLLMProvider,
+    judge: FaithfulnessJudge,
 ) -> StrategyScore:
+    recall_at_1: list[bool] = []
     recall_hits: list[bool] = []
     ranks: list[int | None] = []
     faithful: list[bool] = []
@@ -122,10 +129,11 @@ def _score_strategy(
             ranked_texts = _ranked_texts(contract.text, question.question, strategy, embedder)
             rank = _first_relevant_rank(ranked_texts, question.evidence)
             ranks.append(rank)
+            recall_at_1.append(rank is not None and rank <= 1)
             recall_hits.append(rank is not None and rank <= RECALL_K)
             offsets_ok = citation_offsets_match(contract.text, answer.citations)
-            evidence_cited = any(question.evidence in citation.text for citation in answer.citations)
-            faithful.append(offsets_ok and evidence_cited)
+            verdict = judge.judge(question.claim, answer.citations)
+            faithful.append(offsets_ok and verdict.faithful)
             integrity.append(offsets_ok)
 
     _precision, _recall, strict_f1 = prf(*_micro(strict_counts))
@@ -134,11 +142,13 @@ def _score_strategy(
     per_type = {clause_type: prf(*counts)[2] for clause_type, counts in sorted(strict_counts.items())}
     return StrategyScore(
         name=strategy.name,
+        retrieval_recall_at_1=mean_flag(recall_at_1),
         retrieval_recall_at_5=mean_flag(recall_hits),
         retrieval_mrr=mean_reciprocal_rank(ranks),
         extraction_micro_f1=strict_f1,
         extraction_type_micro_f1=loose_f1,
         citation_faithfulness=mean_flag(faithful),
+        judge=judge.name,
         offset_integrity=mean_flag(integrity),
         risk_flag_accuracy=risk_exact / len(dataset.contracts),
         risk_flag_micro_f1=risk_f1,

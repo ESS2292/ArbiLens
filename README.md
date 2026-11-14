@@ -61,18 +61,22 @@ Hybrid retrieval with reciprocal rank fusion. BM25 is the right tool when the qu
 
 The reranker is optional and small. It adds a lexical bonus on top of the fused score. The bonus can swap a near tie. It is not a cross-encoder, and on this dataset the fusion order is already enough for the headline metrics. The unit tests cover the reorder; the eval does not pretend the reranker is what moved the table.
 
-Grounding. The reader may only quote a substring of a retrieved passage. The binder drops anything else and records the quote's character offsets in the original document. `Grounded: yes` means the offsets match and the answer's numbers appear in the quote. It does not mean the quote answers the question. The evaluation's citation faithfulness checks the second part against a gold evidence sentence. There is no second model in that check.
+Grounding. The reader may only quote a substring of a retrieved passage. The binder drops anything else and records the quote's character offsets in the original document. `Grounded: yes` means the offsets match and the answer's numbers appear in the quote. Citation faithfulness is a separate check: a deterministic judge asks whether a paraphrased claim, which is not a sentence from the contract, is supported by those quotes. It counts a word as supported when the quote contains it or when both sides trigger the same entry in the concept list, and it rejects a cap that the quote contradicts. An OpenAI-compatible judge implements the same interface when `ARBILENS_JUDGE_PROVIDER=openai`. The eval gate does not use it. The offline judge misses paraphrases outside the concept list and can accept a long quote that mentions the facts for the wrong reason.
 
 Risk scores stay deterministic. The rules in `backend/app/engine/risks.py` own the code, the severity, and the recommendation. The FastAPI scorer calls those rules and may attach an explanation from the existing OpenAI Responses client. The explanation cannot replace the score. That split was already the design of the API; the engine now shares the rule text so the CLI and the API cannot diverge.
 
 ## Evaluation
 
-Provider: `fake` (hashed embeddings with a legal-concept list, and an extractive reader). Six original contracts, twelve questions. Regenerate with `arbilens eval`. The definition of each metric is in [docs/EVALS.md](docs/EVALS.md).
+Provider: `fake`. Judge: `deterministic` (lexical and concept overlap, not a model). Regenerate with `arbilens eval`. Definitions and labeling rules are in [docs/EVALS.md](docs/EVALS.md).
+
+The dev set is the original six contracts. It was written so numbered headings, marker words, and the concept list line up with the pipeline. High dev scores mean that alignment held. They are not a claim about unseen contracts.
 
 ```text
-provider=fake  contracts=6  questions=12
+split=dev
+provider=fake  judge=deterministic  contracts=6  questions=12
 metric                     baseline   upgraded      delta
 ---------------------------------------------------------
+retrieval recall@1            0.500      1.000      0.500
 retrieval recall@5            0.500      1.000      0.500
 retrieval MRR                 0.500      1.000      0.500
 clause span F1                0.027      1.000      0.973
@@ -83,9 +87,31 @@ risk-flag accuracy            0.500      1.000      0.500
 risk-flag F1                  0.842      1.000      0.158
 ```
 
-How to read this. Upgraded span F1 is 1.000 because the gold clauses are the numbered sections, the chunker keeps those sections, and each section contains the marker the tagger uses. That is the pipeline agreeing with its own labels, not a lawyer agreeing with the model. Baseline type F1 stays at 0.880 because a window still catches the heading. Baseline span F1 falls apart because a 320-character window cannot cover the longer clauses at the 0.5 intersection-over-union cutoff. Recall and faithfulness move from 0.500 to 1.000: the lexical questions that fit in a window are answerable either way, and the synonym and boundary-crossing questions are not. Offset integrity is 1.000 for both, which is the binder doing its job even when the quote is the wrong clause.
+The held-out set is three contracts written afterward: an unnumbered `Article IV — Payout` heading, a run-on sentence that states two duties, a title-case heading the chunker does not treat as a boundary, clauses with no taxonomy keyword, and questions whose words were given to a distractor instead of the answer. The upgrade does not win this set. Rank-1 retrieval is worse than BM25 alone.
 
-Per-type span F1 is in the JSON report. Baseline is 0 except `payment_terms` at 0.250, where one short clause was aligned to a window on purpose.
+```text
+split=heldout
+provider=fake  judge=deterministic  contracts=3  questions=5
+metric                     baseline   upgraded      delta
+---------------------------------------------------------
+retrieval recall@1            0.600      0.400     -0.200
+retrieval recall@5            0.600      1.000      0.400
+retrieval MRR                 0.600      0.667      0.067
+clause span F1                0.000      0.000      0.000
+clause type F1                0.333      0.333      0.000
+citation faithfulness         0.600      0.600      0.000
+offset integrity              1.000      1.000      0.000
+risk-flag accuracy            0.667      0.667      0.000
+risk-flag F1                  0.941      0.941      0.000
+```
+
+Three failures, all on the upgraded path:
+
+- Bramble asks what Bramble Goods can be asked to pay when an ordinary accident happens. Those words are in `2. Credits`, which is cited. The real cap is under `Article IV — Payout`, which the chunker glues onto `1. Orders` because it is not a numbered heading, and the sentence never says "limitation of liability". The judge scores the credit quote at 12% overlap and rejects it. The rubric then reports a missing liability cap.
+- Yarrow asks who keeps the pictures made for this assignment after the bill is settled. `2. Tools` uses that wording and is cited. The drawings sentence sits under the title-case line `Ownership of new drawings`, inside the `1. Grant` chunk. The quote does not say Maple Press keeps the drawings.
+- Willow puts payment and a covering promise in one sentence under `2. Money and promises`. Neither half matches a gold span at IoU 0.5, so span F1 is zero. The citation is that whole sentence, so the paraphrase judge accepts both claims. A quote can be faithful and still be the wrong span.
+
+Recall@5 is 1.000 on the held-out set because each contract has only a handful of chunks. Recall@1 is the number that shows the miss.
 
 ## Tests and CI
 
@@ -108,21 +134,21 @@ cp frontend/.env.example frontend/.env.local
 docker compose -f infra/docker-compose.yml up --build
 ```
 
-Frontend at `http://localhost:3000`, API at `http://localhost:8000`, OpenAPI at `http://localhost:8000/docs`. Notes on that stack: [docs/development.md](docs/development.md), [docs/deployment.md](docs/deployment.md), [docs/design-decisions.md](docs/design-decisions.md), [docs/reliability.md](docs/reliability.md).
+Frontend at `http://localhost:3000`, API at `http://localhost:8000`, OpenAPI at `http://localhost:8000/docs`. Object storage is `adobe/s3mock` on port 9090. `minio/minio` could not be pulled from Docker Hub, and the mock's `initialBuckets` setting did not create a bucket, so `s3-init` creates `arbilens-documents`. A smoke test against this stack registered a user, uploaded a DOCX, waited for the worker, and `POST /api/v1/documents/{id}/ask` returned the unlimited-liability sentence at characters 27–97 under `1. Limitation of Liability`. Notes: [docs/development.md](docs/development.md), [docs/deployment.md](docs/deployment.md), [docs/design-decisions.md](docs/design-decisions.md), [docs/reliability.md](docs/reliability.md).
 
 ## Limitations
 
-- The offline embedder only generalizes across the concept list in `backend/app/engine/concepts.py`. It will not retrieve a paraphrase that list does not mention.
-- Upgraded scores of 1.000 are on a set written for these rules. They will not survive an arbitrary contract.
-- Citation faithfulness checks that the gold sentence is inside the quote. It does not check entailment of a paraphrase.
-- The tagger is a marker list. A clause that avoids those words is missed, and a window that contains a marker is labeled even when the operative sentence is elsewhere.
-- The worker's normalizer still builds its own chunks for stored documents. The engine is not wired into that pipeline, so upload results are not the eval's clause spans.
+- Dev scores of 1.000 are on contracts written for numbered headings, marker words, and the concept list. The held-out table is the one to read.
+- The offline embedder only generalizes across `backend/app/engine/concepts.py`. The held-out rank-1 drop is the upgraded retriever preferring a distractor that shares the question's words.
+- The deterministic faithfulness judge is not entailment. It misses paraphrases outside the concept list, and it accepts a run-on quote that happens to contain both duties, as Willow does.
+- The tagger is a marker list. "invoice" does not match "invoices". "Article IV — Payout" is not a heading. "this assignment" is tagged as an assignment clause.
+- Upload normalization uses the clause-aware chunker, and `POST /api/v1/documents/{id}/ask` cites the stored spans. Unrecognized headings are still glued to the previous section.
 - No OCR. Scanned PDFs are out of scope.
 - The web application's auth, billing, and webhook handling are unchanged and still have the limits described in the older notes.
 
 ## Roadmap
 
 - Run the same questions through the OpenAI-compatible providers and publish that report next to the fake one, without letting it replace the offline gate.
-- Predict a sentence span inside a clause instead of labeling the whole section.
-- Ask a stored document from the API using the same binder the CLI uses.
+- Predict a sentence span inside a clause instead of labeling the whole section, so a run-on sentence is not one citation.
+- Teach the chunker a heading style only after it is specified generally, and re-measure the held-out set before moving any threshold.
 - OCR for image-only PDFs, as a separate parser in front of the same chunker.

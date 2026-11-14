@@ -1,0 +1,97 @@
+{
+  "provenance": "Held-out contracts written for ArbiLens after the dev set. Labels were chosen by reading the text. They were not copied from chunker output.",
+  "contracts": [
+    {
+      "id": "bramble-supply",
+      "title": "Bramble Supply Terms",
+      "path": "heldout/bramble-supply.txt",
+      "clauses": [
+        {
+          "type": "limitation_of_liability",
+          "text": "Bramble Goods' entire compensation for a mishap stops at the amounts Fern Market paid during the previous calendar year."
+        }
+      ],
+      "risks": [
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "bramble-payout",
+          "question": "What is the most Bramble Goods can be asked to pay when an ordinary accident happens?",
+          "evidence": "Bramble Goods' entire compensation for a mishap stops at the amounts Fern Market paid during the previous calendar year.",
+          "claim": "Bramble's compensation for a mishap stops at the previous calendar year's payments.",
+          "kind": "distractor"
+        }
+      ]
+    },
+    {
+      "id": "willow-advisory",
+      "title": "Willow Advisory Arrangement",
+      "path": "heldout/willow-advisory.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "Oak Retail shall pay Willow Advisory within twenty days of each invoice"
+        },
+        {
+          "type": "indemnification",
+          "text": "Oak Retail shall also cover Willow Advisory against outside claims that arise from Oak Retail's instructions, including claims by Oak Retail's customers."
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "willow-days",
+          "question": "How many days does Oak Retail have to settle an invoice?",
+          "evidence": "Oak Retail shall pay Willow Advisory within twenty days of each invoice",
+          "claim": "Oak Retail has twenty days to settle an invoice.",
+          "kind": "lexical"
+        },
+        {
+          "id": "willow-cover",
+          "question": "Who must make Willow whole for claims caused by Oak Retail's instructions?",
+          "evidence": "Oak Retail shall also cover Willow Advisory against outside claims that arise from Oak Retail's instructions, including claims by Oak Retail's customers.",
+          "claim": "Oak Retail must cover Willow for outside claims caused by Oak Retail's instructions.",
+          "kind": "paraphrase"
+        }
+      ]
+    },
+    {
+      "id": "yarrow-license",
+      "title": "Yarrow License",
+      "path": "heldout/yarrow-license.txt",
+      "clauses": [
+        {
+          "type": "ip_ownership",
+          "text": "Once Maple Press has paid, the drawings created for the job belong to Maple Press."
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "yarrow-owner",
+          "question": "After the bill is settled, who keeps the pictures made for this assignment?",
+          "evidence": "Once Maple Press has paid, the drawings created for the job belong to Maple Press.",
+          "claim": "Maple Press keeps the drawings created for the job once it has paid.",
+          "kind": "distractor"
+        },
+        {
+          "id": "yarrow-templates",
+          "question": "Who keeps the older templates?",
+          "evidence": "Yarrow Studio also keeps its older templates, and those templates stay with the studio rather than moving to the client.",
+          "claim": "The studio keeps the older templates.",
+          "kind": "lexical"
+        }
+      ]
+    }
+  ]
+}

@@ -14,9 +14,9 @@ from app.engine.pipeline import analyze_document, ask_document
 from app.engine.strategy import STRATEGIES
 from app.evalkit.dataset import load_dataset
 from app.evalkit.paths import default_labels_path, default_report_dir, default_thresholds_path
-from app.evalkit.report import render_headline_table, write_report
-from app.evalkit.runner import run_evaluation
-from app.evalkit.thresholds import load_thresholds, threshold_failures
+from app.evalkit.report import render_headline_table, write_suite
+from app.evalkit.runner import EvalReport, run_evaluation
+from app.evalkit.thresholds import load_thresholds, suite_failures
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -61,17 +61,19 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _eval_command(args: argparse.Namespace) -> int:
     labels = args.dataset if args.dataset is not None else default_labels_path()
-    dataset = load_dataset(labels)
-    report = run_evaluation(dataset)
+    reports = _load_reports(labels)
     output_dir = args.output_dir if args.output_dir is not None else default_report_dir(labels)
-    json_path, markdown_path = write_report(report, output_dir)
-    print(render_headline_table(report))
-    print(f"\nWrote {json_path}")
+    json_path, markdown_path = write_suite(reports, output_dir)
+    for name, report in reports.items():
+        print(f"split={name}")
+        print(render_headline_table(report))
+        print()
+    print(f"Wrote {json_path}")
     print(f"Wrote {markdown_path}")
     if not args.check:
         return 0
     thresholds_path = args.thresholds if args.thresholds is not None else default_thresholds_path(labels)
-    failures = threshold_failures(report, load_thresholds(thresholds_path))
+    failures = suite_failures(reports, load_thresholds(thresholds_path))
     if not failures:
         print("Thresholds: passed")
         return 0
@@ -79,6 +81,14 @@ def _eval_command(args: argparse.Namespace) -> int:
     for failure in failures:
         print(f"- {failure}", file=sys.stderr)
     return 1
+
+
+def _load_reports(labels: Path) -> dict[str, EvalReport]:
+    reports = {"dev": run_evaluation(load_dataset(labels))}
+    heldout = labels.parent / "heldout.json"
+    if heldout.is_file():
+        reports["heldout"] = run_evaluation(load_dataset(heldout))
+    return reports
 
 
 def _ask_command(args: argparse.Namespace) -> int:

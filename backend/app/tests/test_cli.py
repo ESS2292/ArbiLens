@@ -45,7 +45,9 @@ def test_eval_writes_a_report_and_passes_the_gate(tmp_path: Path) -> None:
     assert code == 0
     saved = json.loads((output / "latest.json").read_text(encoding="utf-8"))
     assert saved["provider"] == "fake"
-    assert saved["strategies"]["upgraded"]["citation_faithfulness"] == 1
+    assert saved["judge"] == "deterministic"
+    assert saved["splits"]["dev"]["strategies"]["upgraded"]["citation_faithfulness"] == 1
+    assert saved["splits"]["heldout"]["strategies"]["upgraded"]["extraction_micro_f1"] < 1
     assert "retrieval recall@5" in (output / "latest.md").read_text(encoding="utf-8")
 
 

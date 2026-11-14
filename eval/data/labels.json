@@ -37,25 +37,29 @@
           "id": "harbor-invoice",
           "question": "Within how many days of receipt are invoices due?",
           "evidence": "Invoices are due within thirty days of receipt.",
-          "kind": "lexical"
+          "kind": "lexical",
+          "claim": "Invoices must be settled within thirty days of receipt."
         },
         {
           "id": "harbor-secrets",
           "question": "How are nonpublic secrets treated?",
           "evidence": "Each party shall keep the other's confidential information secret and use it only for this agreement.",
-          "kind": "semantic"
+          "kind": "semantic",
+          "claim": "Each party must keep the other's confidential information secret."
         },
         {
           "id": "harbor-indemnity",
           "question": "Which party must indemnify the provider against third-party claims?",
           "evidence": "Customer shall indemnify the provider against third-party claims arising from the customer's materials.",
-          "kind": "straddle"
+          "kind": "straddle",
+          "claim": "The customer must indemnify the provider against third-party claims from the customer's materials."
         },
         {
           "id": "harbor-exposure",
           "question": "Which ceiling bounds monetary exposure?",
           "evidence": "The aggregate liability of Provider under this agreement is unlimited.",
-          "kind": "semantic"
+          "kind": "semantic",
+          "claim": "There is no ceiling on the provider's monetary exposure."
         }
       ]
     },
@@ -101,13 +105,15 @@
           "id": "lighthouse-cap",
           "question": "What is the cap on aggregate liability?",
           "evidence": "The aggregate liability shall not exceed the charges paid during the prior twelve months.",
-          "kind": "straddle"
+          "kind": "straddle",
+          "claim": "The cap on aggregate liability is the charges paid during the prior twelve months."
         },
         {
           "id": "lighthouse-venue",
           "question": "Where does the exclusive venue lie?",
           "evidence": "Exclusive venue lies in the vendor's courts located in the vendor's home county.",
-          "kind": "lexical"
+          "kind": "lexical",
+          "claim": "Exclusive venue is in the vendor's courts in the vendor's home county."
         }
       ]
     },
@@ -140,7 +146,8 @@
           "id": "cedar-exit",
           "question": "Who may terminate for convenience?",
           "evidence": "Provider may terminate for convenience on written notice.",
-          "kind": "lexical"
+          "kind": "lexical",
+          "claim": "The provider may terminate the engagement for convenience."
         }
       ]
     },
@@ -184,13 +191,15 @@
           "id": "pine-uptime",
           "question": "What monthly uptime percentage is promised?",
           "evidence": "The monthly uptime percentage promised for the hosted service is 99.9 percent.",
-          "kind": "straddle"
+          "kind": "straddle",
+          "claim": "The promised monthly uptime percentage is 99.9 percent."
         },
         {
           "id": "pine-audit",
           "question": "How often may books and records be inspected?",
           "evidence": "Books and records may be inspected once per contract year.",
-          "kind": "lexical"
+          "kind": "lexical",
+          "claim": "Books and records may be inspected once each contract year."
         }
       ]
     },
@@ -228,7 +237,8 @@
           "id": "redwood-owner",
           "question": "Who owns newly created work product?",
           "evidence": "Newly created work product is owned by the customer.",
-          "kind": "lexical"
+          "kind": "lexical",
+          "claim": "The customer owns the newly created work product."
         }
       ]
     },
@@ -275,13 +285,15 @@
           "id": "quay-renew",
           "question": "Do these supply terms use automatic renewal?",
           "evidence": "These supply terms use automatic renewal for successive one-year terms.",
-          "kind": "lexical"
+          "kind": "lexical",
+          "claim": "These supply terms renew by automatic renewal for successive one-year terms."
         },
         {
           "id": "quay-burden",
           "question": "Who carries the hold-harmless burden alone?",
           "evidence": "Customer shall indemnify the provider for third-party claims arising out of the customer's data.",
-          "kind": "semantic"
+          "kind": "semantic",
+          "claim": "The customer must indemnify the provider for third-party claims from the customer's data."
         }
       ]
     }

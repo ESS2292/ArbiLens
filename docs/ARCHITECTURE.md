@@ -58,7 +58,7 @@ Clause-aware chunks. A risk or a citation is about a clause, not about an arbitr
 
 Hybrid retrieval plus RRF. BM25 is precise when the question uses the contract's words. It scores zero when the question uses a synonym and nothing else. Embeddings cover that case. The two scores are not on the same scale, so fusion uses ranks rather than a weighted sum of raw scores. `k = 60` is the usual RRF constant.
 
-Faithfulness. The eval does not ask a second model whether a citation "supports" a claim. It checks two mechanical facts: the citation offsets reproduce the quoted text, and the gold evidence sentence is inside that quote. The runtime `Grounded: yes` flag is the mechanical half only. It can be true for a quote that answers the wrong question. The labeled faithfulness number is the one that checks the question.
+Faithfulness. `Grounded: yes` only checks that the quote is an exact slice and that the answer's numbers appear in it. The eval then asks `DeterministicFaithfulnessJudge` whether a paraphrased claim, which is not a sentence from the contract, is supported by those quotes. A word counts when the quote contains it or when both sides trigger the same concept, and a cap claim is rejected when the quote says the exposure is uncapped. `OpenAICompatibleFaithfulnessJudge` implements the same call against a chat endpoint. The gate constructs the deterministic judge itself and ignores `ARBILENS_JUDGE_PROVIDER`. The offline judge misses paraphrases outside the concept list and can accept a run-on quote that mentions every fact.
 
 Shared rubric. `DeterministicRiskScoringService` used to inline the rules. It now builds a `ClauseView` list and calls `evaluate_risk_flags`. Scores, severities, and recommendation text are unchanged. The service still asks the existing Responses API client for an explanation and still refuses to let that explanation replace the score.
 
@@ -68,6 +68,6 @@ The upload pipeline is unchanged:
 
 `parse_document_task -> normalize_document_task -> extract_clauses_task -> analyze_risks_task`
 
-Normalization still cleans headers and builds paragraph-aligned chunks for the database. That chunker was not replaced. The offline engine works on the full text and records offsets into that string; the worker stores chunks that have already been cleaned. Mixing the two would have changed persisted clause text. The eval measures the engine, which is the path a reviewer can run.
+Normalization still cleans headers and repeated lines. It then cuts the cleaned string with `chunk_clause_aware`, the same function the CLI uses, and stores those slices with character offsets into the cleaned text. `POST /api/v1/documents/{id}/ask` retrieves over the stored slices and binds quotes the same way. A heading the detector does not know stays in the previous chunk. That is the Bramble and Yarrow failure, and it is the same failure in the API as in the eval.
 
 The web application still uses Postgres, Redis, Celery, and S3-compatible storage. Its design notes remain in `docs/design-decisions.md`, `docs/reliability.md`, and `docs/deployment.md`.

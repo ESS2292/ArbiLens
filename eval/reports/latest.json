@@ -1,64 +1,122 @@
 {
-  "contract_count": 6,
-  "dataset_fingerprint": "772b92417e5dc66a",
+  "judge": "deterministic",
   "provider": "fake",
-  "question_count": 12,
-  "strategies": {
-    "baseline": {
-      "citation_faithfulness": 0.5,
-      "extraction_micro_f1": 0.02666666666666667,
-      "extraction_type_micro_f1": 0.8800000000000001,
-      "name": "baseline",
-      "offset_integrity": 1.0,
-      "per_type_f1": {
-        "assignment": 0.0,
-        "audit_rights": 0.0,
-        "auto_renewal": 0.0,
-        "confidentiality": 0.0,
-        "data_protection": 0.0,
-        "dispute_resolution": 0.0,
-        "force_majeure": 0.0,
-        "governing_law": 0.0,
-        "indemnification": 0.0,
-        "ip_ownership": 0.0,
-        "limitation_of_liability": 0.0,
-        "payment_terms": 0.25,
-        "sla": 0.0,
-        "termination": 0.0,
-        "warranties": 0.0
-      },
-      "retrieval_mrr": 0.5,
-      "retrieval_recall_at_5": 0.5,
-      "risk_flag_accuracy": 0.5,
-      "risk_flag_micro_f1": 0.8421052631578948
+  "splits": {
+    "dev": {
+      "contract_count": 6,
+      "dataset_fingerprint": "f44e6bf460349996",
+      "provider": "fake",
+      "question_count": 12,
+      "strategies": {
+        "baseline": {
+          "citation_faithfulness": 0.5,
+          "extraction_micro_f1": 0.02666666666666667,
+          "extraction_type_micro_f1": 0.8800000000000001,
+          "judge": "deterministic",
+          "name": "baseline",
+          "offset_integrity": 1.0,
+          "per_type_f1": {
+            "assignment": 0.0,
+            "audit_rights": 0.0,
+            "auto_renewal": 0.0,
+            "confidentiality": 0.0,
+            "data_protection": 0.0,
+            "dispute_resolution": 0.0,
+            "force_majeure": 0.0,
+            "governing_law": 0.0,
+            "indemnification": 0.0,
+            "ip_ownership": 0.0,
+            "limitation_of_liability": 0.0,
+            "payment_terms": 0.25,
+            "sla": 0.0,
+            "termination": 0.0,
+            "warranties": 0.0
+          },
+          "retrieval_mrr": 0.5,
+          "retrieval_recall_at_1": 0.5,
+          "retrieval_recall_at_5": 0.5,
+          "risk_flag_accuracy": 0.5,
+          "risk_flag_micro_f1": 0.8421052631578948
+        },
+        "upgraded": {
+          "citation_faithfulness": 1.0,
+          "extraction_micro_f1": 1.0,
+          "extraction_type_micro_f1": 1.0,
+          "judge": "deterministic",
+          "name": "upgraded",
+          "offset_integrity": 1.0,
+          "per_type_f1": {
+            "assignment": 1.0,
+            "audit_rights": 1.0,
+            "auto_renewal": 1.0,
+            "confidentiality": 1.0,
+            "data_protection": 1.0,
+            "dispute_resolution": 1.0,
+            "force_majeure": 1.0,
+            "governing_law": 1.0,
+            "indemnification": 1.0,
+            "ip_ownership": 1.0,
+            "limitation_of_liability": 1.0,
+            "payment_terms": 1.0,
+            "sla": 1.0,
+            "termination": 1.0,
+            "warranties": 1.0
+          },
+          "retrieval_mrr": 1.0,
+          "retrieval_recall_at_1": 1.0,
+          "retrieval_recall_at_5": 1.0,
+          "risk_flag_accuracy": 1.0,
+          "risk_flag_micro_f1": 1.0
+        }
+      }
     },
-    "upgraded": {
-      "citation_faithfulness": 1.0,
-      "extraction_micro_f1": 1.0,
-      "extraction_type_micro_f1": 1.0,
-      "name": "upgraded",
-      "offset_integrity": 1.0,
-      "per_type_f1": {
-        "assignment": 1.0,
-        "audit_rights": 1.0,
-        "auto_renewal": 1.0,
-        "confidentiality": 1.0,
-        "data_protection": 1.0,
-        "dispute_resolution": 1.0,
-        "force_majeure": 1.0,
-        "governing_law": 1.0,
-        "indemnification": 1.0,
-        "ip_ownership": 1.0,
-        "limitation_of_liability": 1.0,
-        "payment_terms": 1.0,
-        "sla": 1.0,
-        "termination": 1.0,
-        "warranties": 1.0
-      },
-      "retrieval_mrr": 1.0,
-      "retrieval_recall_at_5": 1.0,
-      "risk_flag_accuracy": 1.0,
-      "risk_flag_micro_f1": 1.0
+    "heldout": {
+      "contract_count": 3,
+      "dataset_fingerprint": "6ebe3ba2933e7572",
+      "provider": "fake",
+      "question_count": 5,
+      "strategies": {
+        "baseline": {
+          "citation_faithfulness": 0.6,
+          "extraction_micro_f1": 0.0,
+          "extraction_type_micro_f1": 0.3333333333333333,
+          "judge": "deterministic",
+          "name": "baseline",
+          "offset_integrity": 1.0,
+          "per_type_f1": {
+            "assignment": 0.0,
+            "indemnification": 0.0,
+            "ip_ownership": 0.0,
+            "limitation_of_liability": 0.0,
+            "payment_terms": 0.0
+          },
+          "retrieval_mrr": 0.6,
+          "retrieval_recall_at_1": 0.6,
+          "retrieval_recall_at_5": 0.6,
+          "risk_flag_accuracy": 0.6666666666666666,
+          "risk_flag_micro_f1": 0.9411764705882353
+        },
+        "upgraded": {
+          "citation_faithfulness": 0.6,
+          "extraction_micro_f1": 0.0,
+          "extraction_type_micro_f1": 0.3333333333333333,
+          "judge": "deterministic",
+          "name": "upgraded",
+          "offset_integrity": 1.0,
+          "per_type_f1": {
+            "assignment": 0.0,
+            "indemnification": 0.0,
+            "ip_ownership": 0.0,
+            "limitation_of_liability": 0.0,
+            "payment_terms": 0.0
+          },
+          "retrieval_mrr": 0.6666666666666666,
+          "retrieval_recall_at_1": 0.4,
+          "retrieval_recall_at_5": 1.0,
+          "risk_flag_accuracy": 0.6666666666666666,
+          "risk_flag_micro_f1": 0.9411764705882353
+        }
+      }
     }
   }
 }

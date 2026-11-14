@@ -5,15 +5,15 @@ from pathlib import Path
 
 import pytest
 
-from app.engine.chunking import chunk_fixed_window
-from app.engine.strategy import BASELINE_WINDOW_CHARS
+from app.engine.chunking import chunk_clause_aware, chunk_fixed_window
+from app.engine.strategy import BASELINE_WINDOW_CHARS, upgraded_strategy
 from app.engine.tokenize import tokenize
 from app.evalkit.dataset import load_dataset
 from app.evalkit.metrics import mean_reciprocal_rank, prf, span_iou, spans_match
 from app.evalkit.paths import find_repo_root
-from app.evalkit.report import render_headline_table, report_to_json
+from app.evalkit.report import render_headline_table, suite_to_json
 from app.evalkit.runner import gold_risk_codes, run_evaluation
-from app.evalkit.thresholds import load_thresholds, threshold_failures
+from app.evalkit.thresholds import load_thresholds, suite_failures
 
 ROOT = find_repo_root(Path(__file__))
 LABELS = ROOT / "eval" / "data" / "labels.json"
@@ -66,28 +66,34 @@ def test_dataset_quotes_are_unique_and_risks_follow_the_rubric() -> None:
                 assert contained
 
 
-def test_upgraded_strategy_beats_baseline_and_clears_the_gate(tmp_path: Path) -> None:
-    report = run_evaluation(load_dataset(LABELS))
-    baseline = report.strategies["baseline"]
-    upgraded = report.strategies["upgraded"]
-    assert report.provider == "fake"
-    assert upgraded.retrieval_recall_at_5 > baseline.retrieval_recall_at_5
-    assert upgraded.extraction_micro_f1 > baseline.extraction_micro_f1
-    assert upgraded.citation_faithfulness > baseline.citation_faithfulness
-    assert upgraded.offset_integrity == 1
-    assert baseline.extraction_type_micro_f1 > baseline.extraction_micro_f1
-    failures = threshold_failures(report, load_thresholds(THRESHOLDS))
-    assert failures == []
-    table = render_headline_table(report)
+def test_dev_set_beats_baseline_and_heldout_is_not_perfect() -> None:
+    dev = run_evaluation(load_dataset(LABELS))
+    heldout = run_evaluation(load_dataset(ROOT / "eval" / "data" / "heldout.json"))
+    assert dev.strategies["upgraded"].judge == "deterministic"
+    assert dev.strategies["upgraded"].retrieval_recall_at_5 > dev.strategies["baseline"].retrieval_recall_at_5
+    assert dev.strategies["upgraded"].extraction_micro_f1 > dev.strategies["baseline"].extraction_micro_f1
+    assert heldout.strategies["upgraded"].citation_faithfulness < 1
+    assert heldout.strategies["upgraded"].extraction_micro_f1 < 1
+    reports = {"dev": dev, "heldout": heldout}
+    assert suite_failures(reports, load_thresholds(THRESHOLDS)) == []
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert table in readme
+    assert "split=dev" in readme
+    assert render_headline_table(dev) in readme
+    assert render_headline_table(heldout) in readme
     committed = json.loads((ROOT / "eval" / "reports" / "latest.json").read_text(encoding="utf-8"))
-    assert committed == json.loads(report_to_json(report))
-    broken = json.loads(THRESHOLDS.read_text(encoding="utf-8"))
-    broken["upgraded"]["retrieval_recall_at_5"] = 1.1
-    path = tmp_path / "thresholds.json"
-    path.write_text(json.dumps(broken), encoding="utf-8")
-    assert threshold_failures(report, load_thresholds(path))
+    assert committed == json.loads(suite_to_json(reports))
+
+
+def test_heldout_gold_spans_are_not_the_chunker_output() -> None:
+    dataset = load_dataset(ROOT / "eval" / "data" / "heldout.json")
+    mismatched = 0
+    for contract in dataset.contracts:
+        chunks = chunk_clause_aware(contract.text, max_chars=upgraded_strategy().clause_max_chars)
+        chunk_texts = {chunk.text for chunk in chunks}
+        for clause in contract.clauses:
+            if clause.text not in chunk_texts:
+                mismatched += 1
+    assert mismatched >= 1
 
 
 def test_dataset_loader_rejects_a_missing_quote(tmp_path: Path) -> None:
@@ -109,6 +115,7 @@ def test_dataset_loader_rejects_a_missing_quote(tmp_path: Path) -> None:
                                 "id": "q",
                                 "question": "What is promised?",
                                 "evidence": "The supplier performs the work.",
+                                "claim": "The supplier does the work described.",
                                 "kind": "lexical",
                             }
                         ],

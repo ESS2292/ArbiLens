@@ -25,6 +25,7 @@ class GoldQuestion:
     question_id: str
     question: str
     evidence: str
+    claim: str
     kind: str
 
 
@@ -111,11 +112,20 @@ def _parse_question(contract_id: str, text: str, raw: object) -> GoldQuestion:
     question_id = _require_str(raw, "id")
     question = _require_str(raw, "question")
     evidence = _require_str(raw, "evidence")
+    claim = _require_str(raw, "claim")
     kind = _require_str(raw, "kind")
-    if kind not in {"lexical", "semantic", "straddle"}:
+    if kind not in {"lexical", "semantic", "straddle", "paraphrase", "distractor"}:
         raise ValueError(f"{question_id} has unknown kind {kind}.")
     _locate(contract_id, text, evidence, kind="evidence")
-    return GoldQuestion(question_id=question_id, question=question, evidence=evidence, kind=kind)
+    if claim in text:
+        raise ValueError(f"{question_id} claim is copied from the contract; paraphrase it.")
+    return GoldQuestion(
+        question_id=question_id,
+        question=question,
+        evidence=evidence,
+        claim=claim,
+        kind=kind,
+    )
 
 
 def _locate(contract_id: str, text: str, quote: str, *, kind: str) -> tuple[int, int]:

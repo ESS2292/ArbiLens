@@ -7,6 +7,7 @@ from pathlib import Path
 from app.evalkit.runner import EvalReport, StrategyScore
 
 _HEADLINE = {
+    "retrieval_recall_at_1",
     "retrieval_recall_at_5",
     "retrieval_mrr",
     "extraction_micro_f1",
@@ -26,15 +27,37 @@ class Thresholds:
     min_delta_over_baseline: dict[str, float]
 
 
-def load_thresholds(path: Path) -> Thresholds:
-    """Load the checked-in threshold file."""
+def load_thresholds(path: Path) -> dict[str, Thresholds]:
+    """Load per-split floors. ``min_delta_over_baseline`` may be empty."""
 
     raw = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(raw, dict):
-        raise ValueError(f"{path} must be a JSON object.")
-    upgraded = _metric_map(raw.get("upgraded"), path, "upgraded")
-    delta = _metric_map(raw.get("min_delta_over_baseline"), path, "min_delta_over_baseline")
-    return Thresholds(upgraded=upgraded, min_delta_over_baseline=delta)
+    if not isinstance(raw, dict) or not isinstance(raw.get("splits"), dict) or not raw["splits"]:
+        raise ValueError(f"{path} must contain a non-empty splits object.")
+    loaded: dict[str, Thresholds] = {}
+    for name, body in raw["splits"].items():
+        if not isinstance(body, dict):
+            raise ValueError(f"{path} split {name} must be an object.")
+        upgraded = _metric_map(body.get("upgraded"), path, f"{name}.upgraded")
+        delta = _metric_map(
+            body.get("min_delta_over_baseline", {}),
+            path,
+            f"{name}.min_delta_over_baseline",
+            allow_empty=True,
+        )
+        loaded[str(name)] = Thresholds(upgraded=upgraded, min_delta_over_baseline=delta)
+    return loaded
+
+
+def suite_failures(reports: dict[str, EvalReport], thresholds: dict[str, Thresholds]) -> list[str]:
+    """Failures across dev and held-out splits."""
+
+    failures: list[str] = []
+    for name, report in reports.items():
+        if name not in thresholds:
+            failures.append(f"{name}: no thresholds configured")
+            continue
+        failures.extend(f"{name}: {item}" for item in threshold_failures(report, thresholds[name]))
+    return failures
 
 
 def threshold_failures(report: EvalReport, thresholds: Thresholds) -> list[str]:
@@ -68,8 +91,8 @@ def _metric(score: StrategyScore, name: str) -> float:
     return value
 
 
-def _metric_map(raw: object, path: Path, label: str) -> dict[str, float]:
-    if not isinstance(raw, dict) or not raw:
+def _metric_map(raw: object, path: Path, label: str, *, allow_empty: bool = False) -> dict[str, float]:
+    if not isinstance(raw, dict) or (not raw and not allow_empty):
         raise ValueError(f"{path} is missing {label}.")
     parsed: dict[str, float] = {}
     for key, value in raw.items():

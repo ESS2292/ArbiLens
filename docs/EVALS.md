@@ -1,8 +1,33 @@
 # Evaluation
 
-`arbilens eval` compares two strategies on a labeled set and writes `eval/reports/latest.json` and `eval/reports/latest.md`. `--check` exits 1 when `eval/thresholds.json` fails. GitHub Actions runs that command.
+`arbilens eval` scores two splits and writes `eval/reports/latest.json` and `eval/reports/latest.md`. `--check` exits 1 when `eval/thresholds.json` fails. GitHub Actions runs that command.
 
-The command always uses the offline fake embedding provider and the extractive reader. The report's `provider` field is `fake`.
+Both splits use the offline fake embedder, the extractive reader, and the deterministic faithfulness judge. The gate does not call `ARBILENS_JUDGE_PROVIDER`.
+
+## Labeling rules
+
+Labels are chosen by reading the contract. They are not the output of `chunk_clause_aware` or the marker tagger. A test checks that at least one held-out gold span is not equal to any clause-aware chunk.
+
+A gold clause is the contiguous text a reader would call one operative provision. It may be a sentence inside a longer section. The span is the exact quote stored in the label file. Offsets are resolved by finding that quote, and the loader rejects a quote that is missing or repeated.
+
+Clause type is the legal job of that quote: a damages ceiling is `limitation_of_liability` even when it never says those words. A quote that states two jobs is two gold clauses, even when they share a sentence.
+
+A question's `evidence` is the quote that contains the fact. A question's `claim` is a paraphrase and must not occur verbatim in the contract. `distractor` questions put the question's words in a different section. `paraphrase` questions avoid the evidence's distinctive words. `lexical`, `semantic`, and `straddle` are the dev-set kinds: shared words, concept-list synonyms, and a sentence placed across a 320-character window.
+
+Risk labels are the trigger rules in `backend/app/engine/risks.py` applied by hand to the gold clause text, not to whatever the tagger returned. A test re-runs the code on that gold text to catch transcription mistakes. If the tagger misses a liability clause, the system emits `missing_liability_cap` and the gold set does not.
+
+## Splits
+
+`eval/data/labels.json` is the dev set: six contracts written so numbered headings and marker words agree with the pipeline. `eval/data/heldout.json` is three contracts written afterward. Provenance for both is in `eval/data/PROVENANCE.md`.
+
+## Strategies
+
+| Name | Chunking | Retrievers | Reranker |
+| --- | --- | --- | --- |
+| baseline | fixed windows, 320 characters, no overlap | BM25 | off |
+| upgraded | clause headings the detector knows, otherwise one span until the next known heading | BM25 + fake embeddings, RRF with k = 60 | lexical bonus |
+
+Known headings are `Section 4. Liability`, `2. Payment Terms`, and `4) Payment Terms`. `Article IV — Payout` and `Ownership of new drawings` are not headings. Text under them stays in the previous chunk.
 
 ## Dataset
 
@@ -33,7 +58,7 @@ Clause span precision, recall, and F1. A prediction matches a gold clause of the
 
 Clause type F1. Same matching, but any positive overlap counts. A window that caught the heading and only part of the clause is a type hit and a span miss.
 
-Citation faithfulness. A question counts when every citation's offsets satisfy `document[start:end] == citation.text` and at least one citation contains the gold evidence sentence. This is not a natural-language inference model.
+Citation faithfulness. Offsets must satisfy `document[start:end] == citation.text`, and the deterministic judge must accept the paraphrased claim. A word in the claim counts when the quote contains it or when both sides trigger the same concept. Digits in the claim must appear in the quote. "No ceiling" contradicts "shall not exceed". The judge fails closed: a paraphrase outside the concept list is unfaithful. It also fails open on a run-on quote that happens to contain every fact in the claim, which is the Willow case. Set `ARBILENS_JUDGE_PROVIDER=openai` to send the same claim and quotes to an OpenAI-compatible chat endpoint. That judge is not used for the gate, and it can be wrong in the ordinary way a model is wrong.
 
 Offset integrity. The fraction of questions whose citations are exact slices. An empty citation list is vacuously intact. The upgraded and baseline readers both copy real sentences, so this number should stay at 1. A drop means the binder is wrong.
 
@@ -41,17 +66,17 @@ Risk-flag accuracy. The fraction of contracts whose predicted code set equals th
 
 ## Reading the current numbers
 
-On this set, with the fake provider, the upgraded strategy scores 1.000 on the headline metrics. That is not a claim about neural legal reasoning. It means:
+Dev scores of 1.000 mean the numbered sections, the markers, and the concept list still agree. Held-out scores are the check on that agreement.
 
-- the gold clauses are the numbered sections, and the clause-aware chunker keeps those sections intact
-- every gold section contains the marker the tagger looks for
-- the gold risk codes are exactly what the rubric emits from those sections
-- the fake reader quotes the evidence sentence when retrieval puts that clause in the shortlist
-- the semantic questions were written against the concept list the fake embedder uses
+On the held-out set the upgraded rank-1 recall is 0.400, below the baseline's 0.600. Span F1 is 0.000 for both. Faithfulness is 0.600 for both. The thresholds do not require the upgrade to beat the baseline on this split. They freeze the measured upgraded numbers, including that 0.400, so a later change cannot quietly drop them.
 
-The baseline is not at zero. Type F1 stays high because headings still fall inside some window. Recall@5 and faithfulness are 0.500 because the lexical questions that fit in a window are answerable, and the semantic and straddling questions are not. Span F1 collapses because a 320-character window cannot cover the longer gold clauses at IoU 0.5. `payment_terms` is the exception: one short payment clause was aligned to a window on purpose.
+Recall@5 is a weak number here because each held-out contract has about four chunks. A miss still fits in the top five. Recall@1 and the faithfulness judge are the numbers that move.
 
-If those sentences were rewritten so the markers and the concept list no longer matched, the upgraded score would fall. The gate would fail, which is what it is for.
+Concrete misses on the upgraded path:
+
+- `bramble-payout`. The question asks what Bramble Goods can be asked to pay when an ordinary accident happens. `2. Credits` uses those words and is cited. The cap is the sentence under `Article IV — Payout`, which is not a detected heading, so it sits inside `1. Orders`. The sentence also lacks every liability marker, so the rubric reports `missing_liability_cap`. The judge rejects the credit quote.
+- `yarrow-owner`. The question asks who keeps the pictures made for this assignment after the bill is settled. `2. Tools` repeats that wording and is cited. The drawings sentence is under `Ownership of new drawings`, inside `1. Grant`. The word "assignment" in the distractor is also tagged as an assignment clause.
+- `willow-days` and `willow-cover`. Payment and the covering promise are one sentence. The gold spans are the two halves. Neither matches the section chunk at IoU 0.5. The citation is the whole sentence, so both paraphrases look supported. Faithfulness passes while span F1 stays zero. "invoice" does not match the marker "invoices", so the payment half is not tagged either.
 
 ## Reproduce
 
@@ -62,6 +87,6 @@ arbilens eval
 arbilens eval --check
 ```
 
-Thresholds compare values rounded to three decimal places, the same precision as the table. `upgraded` entries are floors. `min_delta_over_baseline` entries are the minimum gap. Offset integrity is floored at 1.0. Type F1 is floored for the upgraded strategy and is not required to beat the baseline by a wide margin, because the baseline is supposed to detect types from headings.
+Thresholds compare values rounded to three decimal places, the same precision as the table. Dev `min_delta_over_baseline` requires the upgrade to keep its lead on that split. Held-out `min_delta_over_baseline` is empty: the upgrade is not ahead there, and the gate does not pretend it is. Held-out floors are the measured upgraded numbers, so rank-1 recall cannot fall below 0.400 without a threshold edit.
 
 Update `eval/thresholds.json` and the README table in the same change as any dataset or metric edit. `backend/app/tests/test_eval_harness.py` checks that the README contains the table the code just printed.

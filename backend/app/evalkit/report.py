@@ -7,6 +7,7 @@ from pathlib import Path
 from app.evalkit.runner import EvalReport
 
 HEADLINE_METRICS: tuple[tuple[str, str], ...] = (
+    ("retrieval_recall_at_1", "retrieval recall@1"),
     ("retrieval_recall_at_5", "retrieval recall@5"),
     ("retrieval_mrr", "retrieval MRR"),
     ("extraction_micro_f1", "clause span F1"),
@@ -31,7 +32,10 @@ def render_headline_table(report: EvalReport) -> str:
     upgraded = report.strategies["upgraded"]
     header = f"{'metric':<24} {'baseline':>10} {'upgraded':>10} {'delta':>10}"
     lines = [
-        f"provider={report.provider}  contracts={report.contract_count}  questions={report.question_count}",
+        (
+            f"provider={report.provider}  judge={upgraded.judge}  "
+            f"contracts={report.contract_count}  questions={report.question_count}"
+        ),
         header,
         "-" * len(header),
     ]
@@ -90,13 +94,35 @@ def report_to_json(report: EvalReport) -> str:
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
-def write_report(report: EvalReport, output_dir: Path) -> tuple[Path, Path]:
-    """Write ``latest.json`` and ``latest.md``. Returns the two paths."""
+def suite_to_json(reports: dict[str, EvalReport]) -> str:
+    """Stable JSON for every split. No timestamps."""
+
+    payload = {
+        "judge": "deterministic",
+        "provider": "fake",
+        "splits": {name: json.loads(report_to_json(report)) for name, report in reports.items()},
+    }
+    return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+
+
+def suite_to_markdown(reports: dict[str, EvalReport]) -> str:
+    """Markdown with one section per split."""
+
+    parts = ["# ArbiLens evaluation", ""]
+    for name, report in reports.items():
+        parts.append(f"## {name}")
+        parts.append("")
+        parts.append(render_markdown(report))
+    return "\n".join(parts)
+
+
+def write_suite(reports: dict[str, EvalReport], output_dir: Path) -> tuple[Path, Path]:
+    """Write ``latest.json`` and ``latest.md`` for every split."""
 
     directory = Path(output_dir)
     directory.mkdir(parents=True, exist_ok=True)
     json_path = directory / "latest.json"
     markdown_path = directory / "latest.md"
-    json_path.write_text(report_to_json(report), encoding="utf-8")
-    markdown_path.write_text(render_markdown(report), encoding="utf-8")
+    json_path.write_text(suite_to_json(reports), encoding="utf-8")
+    markdown_path.write_text(suite_to_markdown(reports), encoding="utf-8")
     return json_path, markdown_path
