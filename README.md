@@ -16,7 +16,7 @@ arbilens eval
 arbilens ask eval/data/contracts/harbor-msa.txt "Which ceiling bounds monetary exposure?"
 ```
 
-`arbilens eval` prints the table below, writes `eval/reports/latest.json` and `eval/reports/latest.md`, and exits 0 when the checked-in thresholds hold. The ask command prints a sentence copied from the contract and the character span it came from. Both commands use the offline provider. Nothing in this quickstart calls an external API.
+`arbilens eval` prints the table below and writes `eval/reports/latest.json` and `eval/reports/latest.md`. `arbilens eval --check` exits 1 when those numbers fall through `eval/thresholds.json`. The ask command prints a sentence copied from the contract and the character span it came from. Both commands use the offline provider. Nothing in this quickstart calls an external API.
 
 To use a real endpoint for `arbilens ask` only:
 
