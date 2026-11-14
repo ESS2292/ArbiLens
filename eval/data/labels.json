@@ -1,0 +1,289 @@
+{
+  "provenance": "Original contracts written for the ArbiLens evaluation set. They are not copied from any published agreement.",
+  "contracts": [
+    {
+      "id": "harbor-msa",
+      "title": "Harbor Analytics Master Services Agreement",
+      "path": "contracts/harbor-msa.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "2. Payment Terms\nNorthwind shall pay Harbor Analytics for each accepted order form.\nInvoices are due within thirty days of receipt.\nLate amounts accrue interest at one percent per month.\n"
+        },
+        {
+          "type": "confidentiality",
+          "text": "3. Confidentiality\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nEach party shall keep the other's confidential information secret and use it only for this agreement.\nA party may disclose that information to personnel who need it for the work and who are bound to protect it.\nThese duties survive for three years after the agreement ends.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\n"
+        },
+        {
+          "type": "indemnification",
+          "text": "4. Indemnification\nThe retailer remains responsible for the materials it supplies to Harbor Analytics.\nNo course of dealing changes a duty that this section states in writing.\nCustomer shall indemnify the provider against third-party claims arising from the customer's materials.\nThe provider will give prompt notice of a claim and reasonable cooperation in the defense.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\n"
+        },
+        {
+          "type": "limitation_of_liability",
+          "text": "5. Limitation of Liability\nExcept for the carve-outs written in this section, ordinary damages are described here.\nThe aggregate liability of Provider under this agreement is unlimited.\nNothing in this section limits liability for fraud or willful misconduct.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\n"
+        },
+        {
+          "type": "governing_law",
+          "text": "6. Governing Law\nThis agreement is governed by the laws of Delaware, without regard to conflict-of-law principles.\nThe state and federal courts in Delaware may hear disputes about formation of the agreement.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\n"
+        }
+      ],
+      "risks": [
+        "one_sided_indemnity",
+        "uncapped_liability",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "harbor-invoice",
+          "question": "Within how many days of receipt are invoices due?",
+          "evidence": "Invoices are due within thirty days of receipt.",
+          "kind": "lexical"
+        },
+        {
+          "id": "harbor-secrets",
+          "question": "How are nonpublic secrets treated?",
+          "evidence": "Each party shall keep the other's confidential information secret and use it only for this agreement.",
+          "kind": "semantic"
+        },
+        {
+          "id": "harbor-indemnity",
+          "question": "Which party must indemnify the provider against third-party claims?",
+          "evidence": "Customer shall indemnify the provider against third-party claims arising from the customer's materials.",
+          "kind": "straddle"
+        },
+        {
+          "id": "harbor-exposure",
+          "question": "Which ceiling bounds monetary exposure?",
+          "evidence": "The aggregate liability of Provider under this agreement is unlimited.",
+          "kind": "semantic"
+        }
+      ]
+    },
+    {
+      "id": "lighthouse-saas",
+      "title": "Lighthouse SaaS Subscription Agreement",
+      "path": "contracts/lighthouse-saas.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "2. Payment Terms\nSubscription charges are billed annually in advance.\nUndisputed charges are payable within forty-five days after the invoice date.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\n"
+        },
+        {
+          "type": "limitation_of_liability",
+          "text": "3. Limitation of Liability\nThe parties intend a mutual boundary on ordinary contract damages.\nA party's failure to insist on strict performance is not a continuing waiver.\nThe aggregate liability shall not exceed the charges paid during the prior twelve months.\nNeither party is liable for lost profits or indirect damages under this section.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\n"
+        },
+        {
+          "type": "indemnification",
+          "text": "4. Indemnification\nEach party shall indemnify the other party against third-party claims caused by its own breach.\nThe indemnified party will give notice and control of the defense stays with the indemnifying party.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\n"
+        },
+        {
+          "type": "confidentiality",
+          "text": "5. Confidentiality\nEach party shall protect confidential information with the care it uses for its own similar material.\nThe duty does not cover information that is public through no fault of the receiving party.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\n"
+        },
+        {
+          "type": "auto_renewal",
+          "text": "6. Automatic Renewal\nThe subscription uses automatic renewal for successive one-year terms.\nEither party may stop the next term by giving notice at least thirty days before the term ends.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\n"
+        },
+        {
+          "type": "dispute_resolution",
+          "text": "7. Dispute Resolution\nThe parties will first try to resolve a disagreement through discussion between executives.\nExclusive venue lies in the vendor's courts located in the vendor's home county.\nA party may still seek interim relief to preserve its position.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\n"
+        },
+        {
+          "type": "data_protection",
+          "text": "8. Data Protection\nLighthouse will apply reasonable security measures to personal data it processes for the clinic.\nIt will notify the clinic without undue delay after becoming aware of a confirmed incident.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\n"
+        }
+      ],
+      "risks": [
+        "unfavorable_dispute_language"
+      ],
+      "questions": [
+        {
+          "id": "lighthouse-cap",
+          "question": "What is the cap on aggregate liability?",
+          "evidence": "The aggregate liability shall not exceed the charges paid during the prior twelve months.",
+          "kind": "straddle"
+        },
+        {
+          "id": "lighthouse-venue",
+          "question": "Where does the exclusive venue lie?",
+          "evidence": "Exclusive venue lies in the vendor's courts located in the vendor's home county.",
+          "kind": "lexical"
+        }
+      ]
+    },
+    {
+      "id": "cedar-consulting",
+      "title": "Cedar Consulting Services Agreement",
+      "path": "contracts/cedar-consulting.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "2. Payment Terms\nProfessional charges are billed monthly for time actually spent.\nBirch Manufacturing will pay properly issued invoices within fifteen days.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\n"
+        },
+        {
+          "type": "termination",
+          "text": "3. Termination\nThe engagement is meant to be short and the advisor wants an exit right.\nProvider may terminate for convenience on written notice.\nThe client will pay for work performed through the effective date of that notice.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\n"
+        },
+        {
+          "type": "governing_law",
+          "text": "4. Governing Law\nThis agreement is governed by the laws of Oregon, without regard to conflict rules.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\n"
+        }
+      ],
+      "risks": [
+        "missing_confidentiality",
+        "missing_liability_cap",
+        "unilateral_termination",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "cedar-exit",
+          "question": "Who may terminate for convenience?",
+          "evidence": "Provider may terminate for convenience on written notice.",
+          "kind": "lexical"
+        }
+      ]
+    },
+    {
+      "id": "pine-services",
+      "title": "Pine Hosting Services Agreement",
+      "path": "contracts/pine-services.txt",
+      "clauses": [
+        {
+          "type": "confidentiality",
+          "text": "2. Confidentiality\nEach party shall protect confidential information received from the other.\nThe duty lasts for two years after the agreement ends.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\n"
+        },
+        {
+          "type": "limitation_of_liability",
+          "text": "3. Limitation of Liability\nOrdinary damages under this agreement are limited.\nAggregate liability is limited to the charges paid in the prior six months.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\n"
+        },
+        {
+          "type": "sla",
+          "text": "4. Service Levels\nPine Hosting publishes a monthly operating target for the hosted environment.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nThe monthly uptime percentage promised for the hosted service is 99.9 percent.\nService credits are the client's sole remedy for missing that target.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\n"
+        },
+        {
+          "type": "audit_rights",
+          "text": "5. Audit Rights\nAspen Markets may review the controls that relate to the hosted environment.\nBooks and records may be inspected once per contract year.\nReviews will occur on reasonable notice during business hours.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\n"
+        },
+        {
+          "type": "data_protection",
+          "text": "6. Data Protection\nPine Hosting will keep reasonable security measures around personal data on the hosted systems.\nSubprocessors will be bound to duties no less protective than this section.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\n"
+        },
+        {
+          "type": "force_majeure",
+          "text": "7. Force Majeure\nA party is excused for delay caused by a force majeure event beyond its reasonable control.\nThe affected party will give notice and resume performance when it can.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\n"
+        },
+        {
+          "type": "warranties",
+          "text": "8. Warranties\nExcept for the express commitments in this agreement, the service is provided as is.\nPine Hosting disclaims implied warranties of merchantability and fitness.\nNo course of dealing changes a duty that this section states in writing.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\n"
+        }
+      ],
+      "risks": [],
+      "questions": [
+        {
+          "id": "pine-uptime",
+          "question": "What monthly uptime percentage is promised?",
+          "evidence": "The monthly uptime percentage promised for the hosted service is 99.9 percent.",
+          "kind": "straddle"
+        },
+        {
+          "id": "pine-audit",
+          "question": "How often may books and records be inspected?",
+          "evidence": "Books and records may be inspected once per contract year.",
+          "kind": "lexical"
+        }
+      ]
+    },
+    {
+      "id": "redwood-license",
+      "title": "Redwood Design License",
+      "path": "contracts/redwood-license.txt",
+      "clauses": [
+        {
+          "type": "ip_ownership",
+          "text": "2. Intellectual Property\nUpon payment, the deliverables transfer to the client.\nThe English language version of this section controls if a translation differs.\nNewly created work product is owned by the customer.\nRedwood Studio keeps its pre-existing tools and templates.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\n"
+        },
+        {
+          "type": "assignment",
+          "text": "3. Assignment\nNeither party may assign this agreement without the prior written consent of the other.\nConsent will not be unreasonably withheld for an assignment to a successor of the whole business.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\n"
+        },
+        {
+          "type": "confidentiality",
+          "text": "4. Confidentiality\nEach party shall keep confidential information of the other in confidence.\nPublic information is not covered by this duty.\nNo course of dealing changes a duty that this section states in writing.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\n"
+        },
+        {
+          "type": "limitation_of_liability",
+          "text": "5. Limitation of Liability\nLiability for ordinary damages is capped at the amounts paid under the statement of work.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\n"
+        },
+        {
+          "type": "governing_law",
+          "text": "6. Governing Law\nThis license is governed by the laws of Colorado.\nNo course of dealing changes a duty that this section states in writing.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\n"
+        }
+      ],
+      "risks": [
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "redwood-owner",
+          "question": "Who owns newly created work product?",
+          "evidence": "Newly created work product is owned by the customer.",
+          "kind": "lexical"
+        }
+      ]
+    },
+    {
+      "id": "quay-vendor",
+      "title": "Quay Vendor Supply Terms",
+      "path": "contracts/quay-vendor.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "1. Payment Terms\nDelta Grocers will pay invoices for accepted shipments within twenty days.\nQuay Supply may suspend shipments when an undisputed invoice is overdue.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\nA waiver of one breach is not a waiver of any later breach.\n"
+        },
+        {
+          "type": "indemnification",
+          "text": "2. Indemnification\nThe buyer is responsible for how it uses the packaging after delivery.\nThis section binds the parties and their permitted successors.\nCustomer shall indemnify the provider for third-party claims arising out of the customer's data.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\n"
+        },
+        {
+          "type": "auto_renewal",
+          "text": "3. Automatic Renewal\nThese supply terms use automatic renewal for successive one-year terms.\nEither side may decline the next term with notice.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\n"
+        },
+        {
+          "type": "termination",
+          "text": "4. Termination\nEither party may terminate for convenience by giving sixty days' notice.\nOrders accepted before the effective date will still be filled.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\n"
+        },
+        {
+          "type": "data_protection",
+          "text": "5. Data Protection\nQuay Supply may process personal data of the buyer's staff to administer the account.\nThe vendor will not sell that personal data.\nThe English language version of this section controls if a translation differs.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\n"
+        },
+        {
+          "type": "limitation_of_liability",
+          "text": "6. Limitation of Liability\nLiability for damaged shipments is limited to the price of the affected goods.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\nThis section binds the parties and their permitted successors.\nNotices under this section must be sent in writing and are effective when received.\nThe parties will cooperate in good faith when carrying out this section.\nElectronic copies of this section have the same effect as paper copies.\nNothing in this section creates a partnership, joint venture, or agency.\nEach party bears its own costs except where this section says otherwise.\nThe English language version of this section controls if a translation differs.\n"
+        },
+        {
+          "type": "confidentiality",
+          "text": "7. Confidentiality\nEach party shall protect the other's confidential information during the supply relationship.\nAmendments to this section must be signed by both parties before they take effect.\nA party's failure to insist on strict performance is not a continuing waiver.\nSchedules referenced by this section are part of the agreement if both parties sign them.\nThe parties acknowledge that they have read this section and accept it as written.\nHeadings in this section are for convenience of reference and do not change the meaning of the text.\nNo course of dealing changes a duty that this section states in writing.\nA waiver of one breach is not a waiver of any later breach.\nIf a court holds one sentence unenforceable, the rest of this section remains in effect.\n"
+        }
+      ],
+      "risks": [
+        "one_sided_indemnity",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "quay-renew",
+          "question": "Do these supply terms use automatic renewal?",
+          "evidence": "These supply terms use automatic renewal for successive one-year terms.",
+          "kind": "lexical"
+        },
+        {
+          "id": "quay-burden",
+          "question": "Who carries the hold-harmless burden alone?",
+          "evidence": "Customer shall indemnify the provider for third-party claims arising out of the customer's data.",
+          "kind": "semantic"
+        }
+      ]
+    }
+  ]
+}
