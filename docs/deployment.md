@@ -51,7 +51,7 @@ Frontend:
 
 For this repository, the local Compose stack now encodes most of that flow directly:
 
-- `minio-init` creates the bucket
+- `s3` (`adobe/s3mock`) creates the `arbilens-documents` bucket from `initialBuckets`
 - `migrate` runs `alembic upgrade head`
 - `backend` and `worker` depend on successful migration completion
 

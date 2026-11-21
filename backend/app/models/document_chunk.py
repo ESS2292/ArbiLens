@@ -7,9 +7,7 @@ from app.models.mixins import TimestampMixin, UUIDPrimaryKeyMixin
 
 class DocumentChunk(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "document_chunks"
-    __table_args__ = (
-        UniqueConstraint("document_version_id", "chunk_index", name="uq_document_chunks_index"),
-    )
+    __table_args__ = (UniqueConstraint("document_version_id", "chunk_index", name="uq_document_chunks_index"),)
 
     document_version_id: Mapped[str] = mapped_column(ForeignKey("document_versions.id"), nullable=False, index=True)
     extracted_text_id: Mapped[str | None] = mapped_column(ForeignKey("extracted_text.id"), nullable=True, index=True)

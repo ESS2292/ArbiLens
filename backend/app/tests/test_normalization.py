@@ -25,10 +25,7 @@ def test_normalization_removes_repeated_headers_and_joins_wrapped_lines() -> Non
             ParsedSection(
                 heading="Section 2. Fees",
                 text=(
-                    "ACME MASTER SERVICES AGREEMENT\n"
-                    "Section 2. Fees\n"
-                    "2.1 Fees are due within thirty days.\n"
-                    "Page 2 of 2"
+                    "ACME MASTER SERVICES AGREEMENT\nSection 2. Fees\n2.1 Fees are due within thirty days.\nPage 2 of 2"
                 ),
                 page_start=2,
                 page_end=2,

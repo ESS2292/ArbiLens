@@ -1,0 +1,276 @@
+{
+  "judge": "deterministic",
+  "provider": "fake",
+  "splits": {
+    "dev": {
+      "contract_count": 6,
+      "dataset_fingerprint": "f44e6bf460349996",
+      "provider": "fake",
+      "question_count": 12,
+      "strategies": {
+        "baseline": {
+          "citation_faithfulness": 0.5,
+          "extraction_micro_f1": 0.02666666666666667,
+          "extraction_type_micro_f1": 0.9066666666666667,
+          "judge": "deterministic",
+          "name": "baseline",
+          "offset_integrity": 1.0,
+          "per_heading_recall_at_1": {},
+          "per_heading_span_recall": {},
+          "per_type_f1": {
+            "assignment": 0.0,
+            "audit_rights": 0.0,
+            "auto_renewal": 0.0,
+            "confidentiality": 0.0,
+            "data_protection": 0.0,
+            "dispute_resolution": 0.0,
+            "force_majeure": 0.0,
+            "governing_law": 0.0,
+            "indemnification": 0.0,
+            "ip_ownership": 0.0,
+            "limitation_of_liability": 0.0,
+            "payment_terms": 0.22222222222222224,
+            "sla": 0.0,
+            "termination": 0.0,
+            "warranties": 0.0
+          },
+          "retrieval_mrr": 0.5,
+          "retrieval_recall_at_1": 0.5,
+          "retrieval_recall_at_5": 0.5,
+          "risk_flag_accuracy": 0.5,
+          "risk_flag_micro_f1": 0.8421052631578948
+        },
+        "upgraded": {
+          "citation_faithfulness": 1.0,
+          "extraction_micro_f1": 1.0,
+          "extraction_type_micro_f1": 1.0,
+          "judge": "deterministic",
+          "name": "upgraded",
+          "offset_integrity": 1.0,
+          "per_heading_recall_at_1": {},
+          "per_heading_span_recall": {},
+          "per_type_f1": {
+            "assignment": 1.0,
+            "audit_rights": 1.0,
+            "auto_renewal": 1.0,
+            "confidentiality": 1.0,
+            "data_protection": 1.0,
+            "dispute_resolution": 1.0,
+            "force_majeure": 1.0,
+            "governing_law": 1.0,
+            "indemnification": 1.0,
+            "ip_ownership": 1.0,
+            "limitation_of_liability": 1.0,
+            "payment_terms": 1.0,
+            "sla": 1.0,
+            "termination": 1.0,
+            "warranties": 1.0
+          },
+          "retrieval_mrr": 1.0,
+          "retrieval_recall_at_1": 1.0,
+          "retrieval_recall_at_5": 1.0,
+          "risk_flag_accuracy": 1.0,
+          "risk_flag_micro_f1": 1.0
+        }
+      }
+    },
+    "heldout": {
+      "contract_count": 12,
+      "dataset_fingerprint": "6d87b3664e8d4ee0",
+      "provider": "fake",
+      "question_count": 48,
+      "strategies": {
+        "baseline": {
+          "citation_faithfulness": 0.7083333333333334,
+          "extraction_micro_f1": 0.06557377049180328,
+          "extraction_type_micro_f1": 0.9180327868852458,
+          "judge": "deterministic",
+          "name": "baseline",
+          "offset_integrity": 1.0,
+          "per_heading_recall_at_1": {
+            "all_caps": 0.8,
+            "article_emdash": 0.5,
+            "combined_sentence": 1.0,
+            "inline": 0.75,
+            "lettered": 0.75,
+            "numbered": 0.85,
+            "roman": 0.75,
+            "run_on": 1.0,
+            "title_case": 0.3333333333333333
+          },
+          "per_heading_span_recall": {
+            "all_caps": 0.2,
+            "article_emdash": 0.0,
+            "combined_sentence": 0.0,
+            "inline": 0.0,
+            "lettered": 0.0,
+            "numbered": 0.1,
+            "roman": 0.0,
+            "title_case": 0.0
+          },
+          "per_type_f1": {
+            "assignment": 0.0,
+            "audit_rights": 1.0,
+            "auto_renewal": 0.0,
+            "confidentiality": 0.0,
+            "data_protection": 0.0,
+            "dispute_resolution": 0.0,
+            "force_majeure": 0.0,
+            "governing_law": 0.3333333333333333,
+            "indemnification": 0.0,
+            "ip_ownership": 0.0,
+            "limitation_of_liability": 0.0,
+            "payment_terms": 0.0,
+            "sla": 0.0,
+            "termination": 0.0,
+            "warranties": 0.0
+          },
+          "retrieval_mrr": 0.7916666666666666,
+          "retrieval_recall_at_1": 0.7916666666666666,
+          "retrieval_recall_at_5": 0.7916666666666666,
+          "risk_flag_accuracy": 0.75,
+          "risk_flag_micro_f1": 0.9523809523809523
+        },
+        "upgraded": {
+          "citation_faithfulness": 0.8333333333333334,
+          "extraction_micro_f1": 0.870967741935484,
+          "extraction_type_micro_f1": 0.967741935483871,
+          "judge": "deterministic",
+          "name": "upgraded",
+          "offset_integrity": 1.0,
+          "per_heading_recall_at_1": {
+            "all_caps": 1.0,
+            "article_emdash": 0.5,
+            "combined_sentence": 1.0,
+            "inline": 1.0,
+            "lettered": 1.0,
+            "numbered": 0.9,
+            "roman": 1.0,
+            "run_on": 1.0,
+            "title_case": 0.6666666666666666
+          },
+          "per_heading_span_recall": {
+            "all_caps": 1.0,
+            "article_emdash": 0.5,
+            "combined_sentence": 0.5,
+            "inline": 1.0,
+            "lettered": 0.75,
+            "numbered": 0.8,
+            "roman": 1.0,
+            "title_case": 1.0
+          },
+          "per_type_f1": {
+            "assignment": 0.0,
+            "audit_rights": 1.0,
+            "auto_renewal": 1.0,
+            "confidentiality": 1.0,
+            "data_protection": 1.0,
+            "dispute_resolution": 1.0,
+            "force_majeure": 1.0,
+            "governing_law": 1.0,
+            "indemnification": 1.0,
+            "ip_ownership": 1.0,
+            "limitation_of_liability": 0.5,
+            "payment_terms": 0.75,
+            "sla": 1.0,
+            "termination": 1.0,
+            "warranties": 1.0
+          },
+          "retrieval_mrr": 0.9486111111111111,
+          "retrieval_recall_at_1": 0.9166666666666666,
+          "retrieval_recall_at_5": 1.0,
+          "risk_flag_accuracy": 0.8333333333333334,
+          "risk_flag_micro_f1": 0.96875
+        }
+      }
+    },
+    "tuning": {
+      "contract_count": 7,
+      "dataset_fingerprint": "eb7a216b6e5ce165",
+      "provider": "fake",
+      "question_count": 13,
+      "strategies": {
+        "baseline": {
+          "citation_faithfulness": 0.7692307692307693,
+          "extraction_micro_f1": 0.0,
+          "extraction_type_micro_f1": 0.8,
+          "judge": "deterministic",
+          "name": "baseline",
+          "offset_integrity": 1.0,
+          "per_heading_recall_at_1": {
+            "all_caps": 1.0,
+            "article_emdash": 0.0,
+            "combined_sentence": 1.0,
+            "inline": 1.0,
+            "lettered": 1.0,
+            "numbered": 0.0,
+            "roman": 1.0,
+            "title_case": 1.0
+          },
+          "per_heading_span_recall": {
+            "all_caps": 0.0,
+            "article_emdash": 0.0,
+            "combined_sentence": 0.0,
+            "inline": 0.0,
+            "lettered": 0.0,
+            "roman": 0.0,
+            "title_case": 0.0
+          },
+          "per_type_f1": {
+            "confidentiality": 0.0,
+            "governing_law": 0.0,
+            "indemnification": 0.0,
+            "ip_ownership": 0.0,
+            "limitation_of_liability": 0.0,
+            "payment_terms": 0.0
+          },
+          "retrieval_mrr": 0.8461538461538461,
+          "retrieval_recall_at_1": 0.8461538461538461,
+          "retrieval_recall_at_5": 0.8461538461538461,
+          "risk_flag_accuracy": 0.7142857142857143,
+          "risk_flag_micro_f1": 0.9444444444444444
+        },
+        "upgraded": {
+          "citation_faithfulness": 0.7692307692307693,
+          "extraction_micro_f1": 0.761904761904762,
+          "extraction_type_micro_f1": 0.8571428571428571,
+          "judge": "deterministic",
+          "name": "upgraded",
+          "offset_integrity": 1.0,
+          "per_heading_recall_at_1": {
+            "all_caps": 1.0,
+            "article_emdash": 0.0,
+            "combined_sentence": 1.0,
+            "inline": 1.0,
+            "lettered": 1.0,
+            "numbered": 1.0,
+            "roman": 1.0,
+            "title_case": 0.0
+          },
+          "per_heading_span_recall": {
+            "all_caps": 1.0,
+            "article_emdash": 0.0,
+            "combined_sentence": 0.0,
+            "inline": 1.0,
+            "lettered": 0.5,
+            "roman": 1.0,
+            "title_case": 1.0
+          },
+          "per_type_f1": {
+            "confidentiality": 1.0,
+            "governing_law": 1.0,
+            "indemnification": 0.0,
+            "ip_ownership": 1.0,
+            "limitation_of_liability": 0.0,
+            "payment_terms": 0.8000000000000002
+          },
+          "retrieval_mrr": 0.8871794871794871,
+          "retrieval_recall_at_1": 0.8461538461538461,
+          "retrieval_recall_at_5": 1.0,
+          "risk_flag_accuracy": 0.7142857142857143,
+          "risk_flag_micro_f1": 0.9444444444444444
+        }
+      }
+    }
+  }
+}

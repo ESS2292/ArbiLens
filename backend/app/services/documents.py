@@ -1,10 +1,10 @@
-import logging
 import hashlib
+import logging
 from http import HTTPStatus
 from io import BytesIO
 from pathlib import Path
-from zipfile import BadZipFile, ZipFile
 from uuid import UUID
+from zipfile import BadZipFile, ZipFile
 
 from fastapi import UploadFile
 from sqlalchemy import select
@@ -13,10 +13,10 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.models.analysis_job import AnalysisJob
-from app.models.risk import Risk
 from app.models.document import Document
 from app.models.document_version import DocumentVersion
 from app.models.enums import DocumentStatus, JobStatus
+from app.models.risk import Risk
 from app.models.user import User
 from app.schemas.documents import DocumentListItem, DocumentStatusResponse, DocumentUploadResponse
 from app.services.storage import ObjectStorageService
@@ -165,8 +165,7 @@ class DocumentService:
             # Persist the original artifact before creating downstream records so
             # every job/version points at a concrete object-storage key.
             storage_key = (
-                f"organizations/{current_user.organization_id}/documents/{next_document.id}/"
-                f"versions/1/{filename}"
+                f"organizations/{current_user.organization_id}/documents/{next_document.id}/versions/1/{filename}"
             )
             if self.storage_service is None:
                 raise AppError(

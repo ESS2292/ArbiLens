@@ -30,7 +30,7 @@ Services exposed locally:
 - frontend: `http://localhost:3000`
 - backend: `http://localhost:8000`
 - OpenAPI docs: `http://localhost:8000/docs`
-- MinIO console: `http://localhost:9001`
+- S3 mock: `http://localhost:9090` (`adobe/s3mock`; the `minio/minio` image could not be pulled)
 
 If you change models or Alembic revisions later, rerun migrations explicitly:
 

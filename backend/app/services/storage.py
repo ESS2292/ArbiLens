@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 import boto3
 from botocore.client import BaseClient
+from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError
 
 from app.core.config import get_settings
@@ -73,12 +74,15 @@ class ObjectStorageService:
 
 def get_s3_client() -> BaseClient:
     settings = get_settings()
+    # Path-style addressing works for MinIO and other non-AWS endpoints.
+    config = Config(s3={"addressing_style": "path"}) if settings.s3_endpoint_url else None
     return boto3.client(
         "s3",
         endpoint_url=settings.s3_endpoint_url,
         aws_access_key_id=settings.s3_access_key,
         aws_secret_access_key=settings.s3_secret_key,
         region_name=settings.s3_region,
+        config=config,
     )
 
 

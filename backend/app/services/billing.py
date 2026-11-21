@@ -91,18 +91,14 @@ class BillingService:
 
     def _sync_subscription(self, subscription, deleted: bool = False) -> None:
         organization = (
-            self.session.query(Organization)
-            .filter_by(stripe_customer_id=subscription.get("customer"))
-            .one_or_none()
+            self.session.query(Organization).filter_by(stripe_customer_id=subscription.get("customer")).one_or_none()
         )
         if organization is None:
             return
         organization.stripe_subscription_id = None if deleted else subscription.get("id")
         organization.stripe_subscription_status = "inactive" if deleted else subscription.get("status", "inactive")
         period_end = subscription.get("current_period_end")
-        organization.subscription_current_period_end = (
-            datetime.fromtimestamp(period_end, UTC) if period_end else None
-        )
+        organization.subscription_current_period_end = datetime.fromtimestamp(period_end, UTC) if period_end else None
         items = subscription.get("items", {}).get("data", [])
         organization.stripe_price_id = items[0]["price"]["id"] if items else organization.stripe_price_id
         self.session.commit()

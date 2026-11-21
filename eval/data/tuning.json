@@ -1,0 +1,264 @@
+{
+  "provenance": "Tuning contracts. The three contracts first used as a small held-out set were moved here because their failure modes had already been inspected. Additional notes were written to exercise heading styles during development. Held-out numbers are not used to choose parameters.",
+  "contracts": [
+    {
+      "id": "bramble-supply",
+      "title": "Bramble Supply Terms",
+      "path": "tuning/bramble-supply.txt",
+      "clauses": [
+        {
+          "type": "limitation_of_liability",
+          "text": "Bramble Goods' entire compensation for a mishap stops at the amounts Fern Market paid during the previous calendar year.",
+          "heading_style": "article_emdash"
+        }
+      ],
+      "risks": [
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "bramble-payout",
+          "question": "What is the most Bramble Goods can be asked to pay when an ordinary accident happens?",
+          "evidence": "Bramble Goods' entire compensation for a mishap stops at the amounts Fern Market paid during the previous calendar year.",
+          "claim": "Bramble's compensation for a mishap stops at the previous calendar year's payments.",
+          "kind": "distractor",
+          "heading_style": "article_emdash"
+        }
+      ]
+    },
+    {
+      "id": "willow-advisory",
+      "title": "Willow Advisory Arrangement",
+      "path": "tuning/willow-advisory.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "Oak Retail shall pay Willow Advisory within twenty days of each invoice",
+          "heading_style": "combined_sentence"
+        },
+        {
+          "type": "indemnification",
+          "text": "Oak Retail shall also cover Willow Advisory against outside claims that arise from Oak Retail's instructions, including claims by Oak Retail's customers.",
+          "heading_style": "combined_sentence"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "willow-days",
+          "question": "How many days does Oak Retail have to settle an invoice?",
+          "evidence": "Oak Retail shall pay Willow Advisory within twenty days of each invoice",
+          "claim": "Oak Retail has twenty days to settle an invoice.",
+          "kind": "lexical",
+          "heading_style": "combined_sentence"
+        },
+        {
+          "id": "willow-cover",
+          "question": "Who must make Willow whole for claims caused by Oak Retail's instructions?",
+          "evidence": "Oak Retail shall also cover Willow Advisory against outside claims that arise from Oak Retail's instructions, including claims by Oak Retail's customers.",
+          "claim": "Oak Retail must cover Willow for outside claims caused by Oak Retail's instructions.",
+          "kind": "paraphrase",
+          "heading_style": "combined_sentence"
+        }
+      ]
+    },
+    {
+      "id": "yarrow-license",
+      "title": "Yarrow License",
+      "path": "tuning/yarrow-license.txt",
+      "clauses": [
+        {
+          "type": "ip_ownership",
+          "text": "Once Maple Press has paid, the drawings created for the job belong to Maple Press.",
+          "heading_style": "title_case"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "yarrow-owner",
+          "question": "After the bill is settled, who keeps the pictures made for this assignment?",
+          "evidence": "Once Maple Press has paid, the drawings created for the job belong to Maple Press.",
+          "claim": "Maple Press keeps the drawings created for the job once it has paid.",
+          "kind": "distractor",
+          "heading_style": "title_case"
+        },
+        {
+          "id": "yarrow-templates",
+          "question": "Who keeps the older templates?",
+          "evidence": "Yarrow Studio also keeps its older templates, and those templates stay with the studio rather than moving to the client.",
+          "claim": "The studio keeps the older templates.",
+          "kind": "lexical",
+          "heading_style": "numbered"
+        }
+      ]
+    },
+    {
+      "id": "tune-caps",
+      "title": "Tuning Caps Note",
+      "path": "tuning/tune-caps.txt",
+      "clauses": [
+        {
+          "type": "confidentiality",
+          "text": "Each party shall keep confidential information secret.",
+          "heading_style": "all_caps"
+        },
+        {
+          "type": "payment_terms",
+          "text": "South Bakery shall pay invoices within seven days.",
+          "heading_style": "all_caps"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "tune-caps-secret",
+          "question": "Must confidential information be kept secret?",
+          "evidence": "Each party shall keep confidential information secret.",
+          "claim": "Confidential information must stay secret.",
+          "kind": "lexical",
+          "heading_style": "all_caps"
+        },
+        {
+          "id": "tune-caps-days",
+          "question": "How many days does South Bakery have to pay invoices?",
+          "evidence": "South Bakery shall pay invoices within seven days.",
+          "claim": "South Bakery has seven days to pay invoices.",
+          "kind": "lexical",
+          "heading_style": "all_caps"
+        }
+      ]
+    },
+    {
+      "id": "tune-roman",
+      "title": "Tuning Roman Note",
+      "path": "tuning/tune-roman.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "West Frame shall pay each invoice within thirteen days.",
+          "heading_style": "roman"
+        },
+        {
+          "type": "governing_law",
+          "text": "This note is governed by the laws of Ohio.",
+          "heading_style": "roman"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "tune-roman-days",
+          "question": "How many days does West Frame have to pay invoices?",
+          "evidence": "West Frame shall pay each invoice within thirteen days.",
+          "claim": "West Frame has thirteen days to pay invoices.",
+          "kind": "lexical",
+          "heading_style": "roman",
+          "variation": "morphology"
+        },
+        {
+          "id": "tune-roman-law",
+          "question": "Which law governs the note?",
+          "evidence": "This note is governed by the laws of Ohio.",
+          "claim": "Ohio law governs the note.",
+          "kind": "paraphrase",
+          "heading_style": "roman"
+        }
+      ]
+    },
+    {
+      "id": "tune-letter",
+      "title": "Tuning Letter Note",
+      "path": "tuning/tune-letter.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "Oak Library shall pay invoices within six days.",
+          "heading_style": "lettered"
+        },
+        {
+          "type": "limitation_of_liability",
+          "text": "Aggregate liability shall not exceed the charges paid during the prior three months.",
+          "heading_style": "lettered"
+        }
+      ],
+      "risks": [
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "tune-letter-days",
+          "question": "How many days does Oak Library have to pay invoices?",
+          "evidence": "Oak Library shall pay invoices within six days.",
+          "claim": "Oak Library has six days to pay invoices.",
+          "kind": "lexical",
+          "heading_style": "lettered"
+        },
+        {
+          "id": "tune-letter-cap",
+          "question": "What limit applies to aggregate liability?",
+          "evidence": "Aggregate liability shall not exceed the charges paid during the prior three months.",
+          "claim": "Aggregate liability shall not exceed the prior three months of charges.",
+          "kind": "paraphrase",
+          "heading_style": "lettered"
+        }
+      ]
+    },
+    {
+      "id": "tune-inline",
+      "title": "Tuning Inline Note",
+      "path": "tuning/tune-inline.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "Maple Grocer shall pay invoices within four days.",
+          "heading_style": "inline"
+        },
+        {
+          "type": "confidentiality",
+          "text": "each party shall keep confidential information secret.",
+          "heading_style": "inline"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "tune-inline-days",
+          "question": "How many days does Maple Grocer have to pay invoices?",
+          "evidence": "Maple Grocer shall pay invoices within four days.",
+          "claim": "Maple Grocer has four days to pay invoices.",
+          "kind": "lexical",
+          "heading_style": "inline"
+        },
+        {
+          "id": "tune-inline-secret",
+          "question": "Must confidential information be kept secret?",
+          "evidence": "each party shall keep confidential information secret.",
+          "claim": "Confidential information must be kept secret.",
+          "kind": "lexical",
+          "heading_style": "inline"
+        }
+      ]
+    }
+  ]
+}

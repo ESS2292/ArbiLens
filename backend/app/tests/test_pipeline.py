@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import get_settings
 from app.core.errors import AppError
+from app.engine.chunking import chunk_clause_aware
+from app.engine.strategy import upgraded_strategy
 from app.models.analysis_job import AnalysisJob
 from app.models.clause import Clause
 from app.models.document import Document
@@ -153,6 +155,70 @@ def test_pipeline_happy_path_runs_for_docx_upload(
     assert len(refreshed_version.risks) >= 1
     assert refreshed_document is not None
     assert refreshed_document.status == DocumentStatus.completed
+
+
+def test_uploaded_docx_chunks_match_the_clause_chunker_and_ask_cites_them(
+    client: TestClient,
+    db_session: Session,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("MAX_UPLOAD_SIZE_BYTES", "65536")
+    get_settings.cache_clear()
+    registered = register_user(client)
+    token = registered["access_token"]
+    buffer = BytesIO()
+    document = DocxDocument()
+    document.add_heading("1. Limitation of Liability", level=1)
+    document.add_paragraph("The aggregate liability of Provider under this agreement is unlimited.")
+    document.add_heading("2. Payment Terms", level=1)
+    document.add_paragraph("Invoices are due within thirty days of receipt.")
+    document.save(buffer)
+
+    upload_response = client.post(
+        "/api/v1/documents/upload",
+        headers={"Authorization": f"Bearer {token}"},
+        files={
+            "upload": (
+                "numbered.docx",
+                buffer.getvalue(),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+        },
+    )
+    assert upload_response.status_code == 201
+    payload = upload_response.json()
+    task_session_factory = sessionmaker(bind=db_session.get_bind(), autocommit=False, autoflush=False, class_=Session)
+    monkeypatch.setattr(document_tasks, "get_session_factory", lambda: task_session_factory)
+    monkeypatch.setattr(document_tasks, "get_object_storage_service", lambda: client.storage)
+    document_tasks.parse_document_task.run(payload["job_id"])
+    document_tasks.normalize_document_task.run(payload["job_id"])
+    document_tasks.extract_clauses_task.run(payload["job_id"])
+    document_tasks.analyze_risks_task.run(payload["job_id"])
+
+    db_session.expire_all()
+    version = db_session.get(DocumentVersion, UUID(payload["document_version_id"]))
+    assert version is not None and version.extracted_text is not None
+    full_text = version.extracted_text.full_text
+    expected = chunk_clause_aware(full_text, max_chars=upgraded_strategy().clause_max_chars)
+    stored = sorted(version.chunks, key=lambda chunk: chunk.chunk_index)
+    assert [(chunk.char_start, chunk.char_end, chunk.text) for chunk in stored] == [
+        (chunk.char_start, chunk.char_end, chunk.text) for chunk in expected
+    ]
+    for chunk in stored:
+        assert full_text[chunk.char_start : chunk.char_end] == chunk.text
+
+    response = client.post(
+        f"/api/v1/documents/{payload['document_id']}/ask",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"question": "Which ceiling bounds monetary exposure?"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["provider"] == "fake"
+    assert body["citations"]
+    citation = body["citations"][0]
+    assert full_text[citation["char_start"] : citation["char_end"]] == citation["text"]
+    assert "unlimited" in citation["text"]
 
 
 def test_pipeline_parse_failure_marks_job_and_document_failed(

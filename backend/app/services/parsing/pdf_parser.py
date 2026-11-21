@@ -1,7 +1,7 @@
 from io import BytesIO
 
 from pypdf import PdfReader
-from pypdf.errors import FileNotDecryptedError, PdfReadError
+from pypdf.errors import PdfReadError
 
 from app.core.errors import AppError
 from app.services.parsing.base import ParsedDocument, ParsedSection

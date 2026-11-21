@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.errors import AppError
 from app.core.security import create_access_token, decode_access_token, hash_password, verify_password
+from app.models.enums import OrganizationRole
 from app.models.organization import Organization
 from app.models.user import User
-from app.models.enums import OrganizationRole
 from app.schemas.auth import (
     AuthResponse,
     LoginRequest,
@@ -60,9 +60,7 @@ class AuthService:
 
     def login(self, payload: LoginRequest) -> AuthResponse:
         user = self.session.scalar(
-            select(User)
-            .options(joinedload(User.organization))
-            .where(User.email == payload.email.lower())
+            select(User).options(joinedload(User.organization)).where(User.email == payload.email.lower())
         )
         if user is None or not verify_password(payload.password, user.password_hash):
             raise AppError(
@@ -87,11 +85,7 @@ class AuthService:
                 status_code=HTTPStatus.UNAUTHORIZED,
                 code="invalid_token",
             )
-        user = self.session.scalar(
-            select(User)
-            .options(joinedload(User.organization))
-            .where(User.id == UUID(user_id))
-        )
+        user = self.session.scalar(select(User).options(joinedload(User.organization)).where(User.id == UUID(user_id)))
         if user is None:
             raise AppError(
                 "Authenticated user was not found.",

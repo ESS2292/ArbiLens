@@ -1,13 +1,13 @@
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
+from app.models.analysis_job import AnalysisJob
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
 from app.models.document_version import DocumentVersion
 from app.models.enums import ClauseType, DocumentStatus, JobStatus, OrganizationRole
 from app.models.organization import Organization
 from app.models.user import User
-from app.models.analysis_job import AnalysisJob
 from app.schemas.ai import ClauseExtractionResponseSchema
 from app.services.extraction import ClauseExtractionService
 
@@ -85,7 +85,9 @@ def test_heuristic_clause_detection_finds_heading_markers(db_session: Session) -
     db_session.add(chunk)
     db_session.flush()
 
-    clauses = ClauseExtractionService(db_session, ai_service=_FakeAIService(ClauseExtractionResponseSchema(clauses=[]))).extract_and_persist(version)
+    clauses = ClauseExtractionService(
+        db_session, ai_service=_FakeAIService(ClauseExtractionResponseSchema(clauses=[]))
+    ).extract_and_persist(version)
 
     assert len(clauses) == 1
     assert clauses[0].clause_type == ClauseType.limitation_of_liability
@@ -214,7 +216,9 @@ def test_ai_clause_candidate_with_wrong_chunk_index_is_discarded(db_session: Ses
                 {
                     "clause_type": "confidentiality",
                     "title": "Confidentiality",
-                    "extracted_text": "This section describes operational dependencies without naming a known clause heading.",
+                    "extracted_text": (
+                        "This section describes operational dependencies without naming a known clause heading."
+                    ),
                     "confidence": 0.8,
                     "source_chunk_index": 999,
                     "page_start": 3,

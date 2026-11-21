@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from app.models.analysis_job import AnalysisJob
 from app.models.enums import DocumentStatus, JobStatus
 
-
 STATUS_TO_DOCUMENT_STATUS: dict[JobStatus, DocumentStatus] = {
     JobStatus.queued: DocumentStatus.queued,
     JobStatus.parsing: DocumentStatus.parsing,

@@ -12,8 +12,8 @@ from app.db.session import get_session_factory
 from app.models.analysis_job import AnalysisJob
 from app.models.document_chunk import DocumentChunk
 from app.models.document_version import DocumentVersion
-from app.models.extracted_text import ExtractedText
 from app.models.enums import JobStatus
+from app.models.extracted_text import ExtractedText
 from app.services.extraction import ClauseExtractionService
 from app.services.jobs import AnalysisJobService
 from app.services.normalization.service import DocumentNormalizationService
@@ -75,18 +75,28 @@ def enqueue_document_pipeline(job_id: str) -> None:
 
 def _parsed_document_from_extracted_text(extracted_text: ExtractedText) -> ParsedDocument:
     representation = extracted_text.structured_representation or {}
-    sections_data = representation.get("sections", [])
-    sections = [
-        ParsedSection(
-            heading=section.get("heading"),
-            text=section.get("text", ""),
-            page_start=section.get("page_start"),
-            page_end=section.get("page_end"),
-        )
-        for section in sections_data
-        if section.get("text")
-    ]
-    metadata = representation.get("metadata", {})
+    raw_sections = representation.get("sections", [])
+    sections: list[ParsedSection] = []
+    if isinstance(raw_sections, list):
+        for section in raw_sections:
+            if not isinstance(section, dict):
+                continue
+            text = section.get("text", "")
+            if not isinstance(text, str) or not text:
+                continue
+            heading = section.get("heading")
+            page_start = section.get("page_start")
+            page_end = section.get("page_end")
+            sections.append(
+                ParsedSection(
+                    heading=heading if isinstance(heading, str) else None,
+                    text=text,
+                    page_start=page_start if isinstance(page_start, int) else None,
+                    page_end=page_end if isinstance(page_end, int) else None,
+                )
+            )
+    raw_metadata = representation.get("metadata", {})
+    metadata = raw_metadata if isinstance(raw_metadata, dict) else {}
     return ParsedDocument(
         parser_used=extracted_text.parser_used,
         full_text=extracted_text.full_text,

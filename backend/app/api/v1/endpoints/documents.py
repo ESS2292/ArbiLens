@@ -1,15 +1,26 @@
-from fastapi import APIRouter, Depends, File, UploadFile, status
-from sqlalchemy.orm import Session
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, File, UploadFile, status
+from sqlalchemy.orm import Session
+
 from app.api.dependencies.auth import get_current_active_user
+from app.core.errors import AppError
 from app.db.session import get_db_session
+from app.engine.errors import ProviderError
 from app.models.user import User
 from app.schemas.clauses import ClauseRead
-from app.schemas.documents import DocumentListItem, DocumentStatusResponse, DocumentUploadResponse
+from app.schemas.documents import (
+    AskRequest,
+    AskResponse,
+    CitationRead,
+    DocumentListItem,
+    DocumentStatusResponse,
+    DocumentUploadResponse,
+)
 from app.schemas.risks import RiskRead
 from app.schemas.summary import DocumentDetailResponse, DocumentSummaryResponse
 from app.services.documents import DocumentService
+from app.services.questions import DocumentQuestionService
 from app.services.storage import ObjectStorageService, get_object_storage_service
 from app.services.summaries import DocumentSummaryService
 
@@ -71,6 +82,38 @@ def get_document_risks(
 ) -> list[RiskRead]:
     risks = DocumentSummaryService(session).get_risks(document_id=document_id, current_user=current_user)
     return [RiskRead.model_validate(risk) for risk in risks]
+
+
+@router.post("/{document_id}/ask", response_model=AskResponse)
+def ask_document(
+    document_id: UUID,
+    payload: AskRequest,
+    current_user: User = Depends(get_current_active_user),
+    session: Session = Depends(get_db_session),
+) -> AskResponse:
+    try:
+        answer = DocumentQuestionService(session).ask(
+            document_id=document_id,
+            current_user=current_user,
+            question=payload.question,
+        )
+    except ProviderError as exc:
+        raise AppError(str(exc), status_code=503, code="provider_not_configured") from exc
+    return AskResponse(
+        answer=answer.answer,
+        grounded=answer.grounded,
+        provider=answer.provider,
+        strategy=answer.strategy,
+        citations=[
+            CitationRead(
+                char_start=citation.char_start,
+                char_end=citation.char_end,
+                text=citation.text,
+                section_title=citation.section_title,
+            )
+            for citation in answer.citations
+        ],
+    )
 
 
 @router.post("/upload", response_model=DocumentUploadResponse, status_code=status.HTTP_201_CREATED)

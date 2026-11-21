@@ -1,175 +1,156 @@
 # ArbiLens
 
-[![CI](https://github.com/ESS2292/ArbiLens/actions/workflows/ci.yml/badge.svg)](https://github.com/ESS2292/ArbiLens/actions/workflows/ci.yml)
+ArbiLens answers questions about a contract by retrieving the clause that supports the answer and citing that clause by character offset. A deterministic tagger and risk rubric sit next to the reader, so a score does not depend on a model choosing one. The default path is an offline fake embedder and an extractive reader: clone the repo, install the package, and run the evaluation with no API key, database, or network.
 
-ArbiLens is a contract review application that combines deterministic risk scoring with AI-assisted clause extraction and explanation.
+The same rubric and clause markers back a FastAPI application for upload, review, and export. That application is the product shell. The retrieval engine is what the evaluation measures.
 
-The repository is intentionally built as a monorepo with a real application shape:
+## Quickstart
 
-- `frontend/`: Next.js App Router UI
-- `backend/`: FastAPI API, worker tasks, SQLAlchemy models, Alembic migrations
-- `infra/`: Docker Compose for local development
-- `docs/`: architecture, development, and deployment notes
+Python 3.11 or newer. From a clean checkout:
 
-This is a serious implementation exercise, not a polished commercial product. The codebase is designed to demonstrate backend service design, async job orchestration, typed API integration, multi-tenant boundaries, and pragmatic AI integration without pretending the system is production-complete.
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e "backend[dev]"
+arbilens eval
+arbilens ask eval/data/contracts/harbor-msa.txt "Which ceiling bounds monetary exposure?"
+```
 
-## What ArbiLens Does
+`arbilens eval` prints the table below and writes `eval/reports/latest.json` and `eval/reports/latest.md`. `arbilens eval --check` exits 1 when those numbers fall through `eval/thresholds.json`. The ask command prints a sentence copied from the contract and the character span it came from. Both commands use the offline provider. Nothing in this quickstart calls an external API.
 
-ArbiLens accepts a contract upload, stores the original file, parses and normalizes the text in background workers, extracts clause candidates, applies deterministic risk rules, and exposes structured results through an authenticated UI and API.
+To use a real endpoint for `arbilens ask` only:
 
-Supported source formats today:
+```bash
+export ARBILENS_LLM_PROVIDER=openai
+export ARBILENS_EMBEDDING_PROVIDER=openai
+export ARBILENS_OPENAI_BASE_URL=https://api.openai.com/v1
+export OPENAI_API_KEY=sk-...
+export ARBILENS_LLM_MODEL=gpt-4.1-mini
+export ARBILENS_EMBEDDING_MODEL=text-embedding-3-small
+```
 
-- PDF
-- DOCX
-
-Primary outputs:
-
-- processing status
-- extracted clauses
-- deterministic risk findings
-- document-level summary
-- PDF export
-- contract comparison
-
-The core workflow in this repository is contract ingestion through structured results. Report export, comparison, and billing are implemented, but they are secondary to that main path and should be read that way.
-
-## What This Project Demonstrates
-
-- Service-oriented FastAPI backend design with thin route handlers
-- Async document-processing pipeline using Celery and Redis
-- SQLAlchemy data modeling for multi-tenant SaaS workflows
-- S3-compatible object storage abstraction
-- OpenAI Responses API integration with schema validation and failure handling
-- Deterministic scoring separated from AI-generated explanation text
-- Typed frontend API integration with status polling and failure-state handling
-- Practical test coverage around auth, uploads, parsing, extraction, scoring, reports, and workflow failures
-
-## Verification Status
-
-Last repository verification pass: March 24, 2026.
-
-Verified directly in this repository:
-
-- backend source compiles cleanly with `python3 -m compileall backend/app backend/alembic`
-- local startup flows are documented for Docker Compose and split local services
-- GitHub Actions CI is configured to run backend tests plus frontend typechecks and tests on push and pull request
-
-Not verified in this repository snapshot:
-
-- browser-level end-to-end UI automation in CI
-- a live production deployment target
-
-There is now a browser-level Playwright path in `frontend/e2e/auth-upload-results.spec.ts`, but it is intended as a local verification path first and is not yet part of CI.
+Any server that implements `POST /embeddings` and `POST /chat/completions` works. `arbilens eval` still uses the fake provider, so the gate does not change when a key is present.
 
 ## Architecture
 
-Core services:
+```mermaid
+flowchart TD
+  text[Contract text] --> chunk[Chunker]
+  chunk --> fixed[Fixed windows]
+  chunk --> clauses[Clause spans]
+  fixed --> bm25[BM25]
+  clauses --> bm25
+  clauses --> embed[Embedding provider]
+  bm25 --> rrf[Reciprocal rank fusion]
+  embed --> rrf
+  rrf --> rerank[Optional lexical reranker]
+  rerank --> reader[LLM provider]
+  reader --> bind[Citation binder]
+  bind --> answer[Grounded answer]
+  clauses --> tag[Marker tagger]
+  tag --> risk[Risk rubric]
+```
 
-- `frontend`: Next.js App Router application for login, dashboard, uploads, document results, comparison, billing, and report actions
-- `backend`: FastAPI API with versioned routes under `/api/v1`
-- `postgres`: durable storage for users, organizations, documents, versions, jobs, clauses, risks, and reports
-- `redis`: Celery broker and worker coordination
-- `worker`: Celery task runner for parsing, normalization, extraction, and scoring
-- `object storage`: stores uploaded source files and generated PDF reports
+Detail is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-The repo is organized around clear boundaries:
+## Design decisions
 
-- request handling in API routes
-- business logic in services
-- persistence in models and migrations
-- background processing in task modules
-- UI state and API calls in typed frontend modules
+Clause-aware chunking. The baseline cuts the file into 320-character windows with no overlap. The upgraded chunker cuts on headings such as `2. Payment Terms` and keeps each clause as one slice of the original string. A window that crosses a sentence can contain neither the full sentence nor the clause it belongs to. Citations need the second kind of span.
 
-More detail: `docs/architecture.md`
+Hybrid retrieval with reciprocal rank fusion. BM25 is the right tool when the question repeats the contract's words, and it returns nothing when the question is only a synonym. The offline embedder maps a fixed list of legal phrases onto shared dimensions so "monetary exposure" and "aggregate liability" meet. Those scores are not comparable, so fusion uses rank: `1 / (60 + rank)` from each list a chunk appears in. A chunk missing from one list is not given a fake zero that drags it down.
 
-Related engineering notes:
+The reranker is optional and small. It adds a lexical bonus on top of the fused score. The bonus can swap a near tie. It is not a cross-encoder. Embeddings enter fusion at 0.45 times the BM25 weight. That weight, and scoring each clause by its best sentence, were chosen on the tuning set so a shorter distractor does not outrank a longer clause that contains more of the question.
 
-- `docs/adr-productionization-next.md`
-- `docs/design-decisions.md`
-- `docs/reliability.md`
+Grounding. The reader may only quote a substring of a retrieved passage. The binder drops anything else and records the quote's character offsets in the original document. `Grounded: yes` means the offsets match and the answer's numbers appear in the quote. Citation faithfulness is a separate check: a deterministic judge asks whether a paraphrased claim, which is not a sentence from the contract, is supported by those quotes. It counts a word as supported when the quote contains it or when both sides trigger the same entry in the concept list, and it rejects a cap that the quote contradicts. An OpenAI-compatible judge implements the same interface when `ARBILENS_JUDGE_PROVIDER=openai`. The eval gate does not use it. The offline judge misses paraphrases outside the concept list and can accept a long quote that mentions the facts for the wrong reason.
 
-## Repository Map
+Risk scores stay deterministic. The rules in `backend/app/engine/risks.py` own the code, the severity, and the recommendation. The FastAPI scorer calls those rules and may attach an explanation from the existing OpenAI Responses client. The explanation cannot replace the score. That split was already the design of the API; the engine now shares the rule text so the CLI and the API cannot diverge.
 
-If you are reviewing the codebase quickly, these are the highest-signal paths:
+## Evaluation
 
-- `backend/app/services/documents.py`: upload validation, storage handoff, document/version/job creation
-- `backend/app/tasks/document_tasks.py`: async pipeline orchestration and stage transitions
-- `backend/app/services/extraction.py`: hybrid heuristics + AI clause extraction with schema validation
-- `backend/app/services/scoring.py`: deterministic risk rubric and citation generation
-- `backend/app/tests/test_pipeline.py`: end-to-end workflow coverage for PDF and DOCX processing
-- `frontend/lib/api/client.ts`: typed frontend API boundary
-- `frontend/components/documents/document-results.tsx`: result-state handling for queued, failed, and completed analysis
+Provider: `fake`. Judge: `deterministic` (lexical and concept overlap, not a model). Regenerate with `arbilens eval`. Definitions and labeling rules are in [docs/EVALS.md](docs/EVALS.md).
 
-## Processing Pipeline
+The dev set is the original six contracts. It was written so numbered headings, marker words, and the concept list line up with the pipeline. High dev scores mean that alignment held. They are not a claim about unseen contracts.
 
-The contract workflow is staged explicitly:
+The tuning set is where heading, stemming, and fusion choices were made. It includes the three contracts from the first small held-out set, which had already been inspected, plus four short notes. The held-out set is twelve later contracts and forty-eight questions. It was frozen before those changes. Parameters were never tuned on the held-out set.
 
-`upload -> store -> parse -> normalize -> extract -> score -> persist -> display`
+`previous` below is the upgraded pipeline recorded in `eval/reports/previous-upgraded.json` before this round's heading and fusion changes. `upgraded` is the current pipeline. Baseline is fixed windows plus BM25, using the current tagger.
 
-Concrete task flow:
+```text
+split=dev
+provider=fake  judge=deterministic  contracts=6  questions=12
+metric                     baseline   upgraded      delta
+---------------------------------------------------------
+retrieval recall@1            0.500      1.000      0.500
+retrieval recall@5            0.500      1.000      0.500
+retrieval MRR                 0.500      1.000      0.500
+clause span F1                0.027      1.000      0.973
+clause type F1                0.907      1.000      0.093
+citation faithfulness         0.500      1.000      0.500
+offset integrity              1.000      1.000      0.000
+risk-flag accuracy            0.500      1.000      0.500
+risk-flag F1                  0.842      1.000      0.158
+```
 
-`parse_document_task -> normalize_document_task -> extract_clauses_task -> analyze_risks_task`
+Previous upgraded on dev was already 1.000 on every headline metric. It stayed there.
 
-What happens at each step:
+```text
+split=tuning
+provider=fake  judge=deterministic  contracts=7  questions=13
+metric                     baseline   upgraded      delta
+---------------------------------------------------------
+retrieval recall@1            0.846      0.846      0.000
+retrieval recall@5            0.846      1.000      0.154
+retrieval MRR                 0.846      0.887      0.041
+clause span F1                0.000      0.762      0.762
+clause type F1                0.800      0.857      0.057
+citation faithfulness         0.769      0.769      0.000
+offset integrity              1.000      1.000      0.000
+risk-flag accuracy            0.714      0.714      0.000
+risk-flag F1                  0.944      0.944      0.000
+```
 
-1. Upload validates extension, MIME type, size, emptiness, and basic file signature.
-2. The original file is stored in object storage and linked to a `document_version`.
-3. A queued `analysis_job` is created.
-4. Parsing extracts raw text and structured sections.
-5. Normalization cleans text and persists chunks suitable for downstream analysis.
-6. Clause extraction uses heuristics first and the OpenAI Responses API second for ambiguous chunks.
-7. Deterministic rules create risk scores and severities.
-8. The frontend polls status and then renders stored results.
+Previous upgraded on tuning: recall@1 0.769, span F1 0.000, type F1 0.700, faithfulness 0.769. Recall@1 now matches baseline instead of trailing it. Span F1 moved from 0.000 to 0.762.
 
-## Why Async Workers Are Used
+```text
+split=heldout
+provider=fake  judge=deterministic  contracts=12  questions=48
+metric                     baseline   upgraded      delta
+---------------------------------------------------------
+retrieval recall@1            0.792      0.917      0.125
+retrieval recall@5            0.792      1.000      0.208
+retrieval MRR                 0.792      0.949      0.157
+clause span F1                0.066      0.871      0.805
+clause type F1                0.918      0.968      0.050
+citation faithfulness         0.708      0.833      0.125
+offset integrity              1.000      1.000      0.000
+risk-flag accuracy            0.750      0.833      0.083
+risk-flag F1                  0.952      0.969      0.016
+```
 
-Parsing, normalization, AI calls, and export generation are all slow or failure-prone compared with standard request-response API work.
+Previous upgraded on this frozen held-out set: recall@1 0.917, recall@5 1.000, MRR 0.951, span F1 0.295, type F1 0.918, faithfulness 0.792, risk accuracy 0.833, risk F1 0.969. The new pipeline keeps rank-1 recall and lifts span F1 by 0.576 and faithfulness by 0.041. MRR moves from 0.951 to 0.949.
 
-Moving those stages into workers gives the system better behavior:
+Held-out recall@1 by heading style, upgraded: all-caps 1.000, roman 1.000, lettered 1.000, inline 1.000, run-on 1.000, combined sentence 1.000, numbered 0.900, title case 0.667, article-with-dash 0.500. Upgraded span recall for those styles is 1.000 for all-caps, roman, inline, and title case; 0.800 numbered; 0.750 lettered; 0.500 article-with-dash and combined sentence. Assignment span F1 is 0.000. The other clause types on this set are at 0.500 or above, and most are 1.000. The full per-type table is in `eval/reports/latest.md`.
 
-- uploads return quickly
-- failures are isolated to a stage
-- stages can be retried
-- intermediate artifacts can be inspected
-- API responsiveness does not depend on parsing or AI latency
+Three failures that remain on the upgraded path:
 
-This is a deliberate architectural choice, not an optimization added later.
+- Kelp asks what Kelp Goods can be asked to pay when an ordinary accident happens. `2. Credits` repeats that wording and is cited. The cap is the sentence under `Article IV — Compensation`, which is now its own chunk, and the judge scores the credit quote at 12% overlap. A distractor that copies the question still beats a paraphrase of the cap.
+- Flint asks whether the supply renews automatically. The renewal sentence says "automatic renewal". The question says "renew automatically". BM25 is not stemmed, the termination sentence also says "supply", and that sentence is cited. Marker stemming fixed `invoice` versus `invoices`. It does not fix retrieval.
+- Nile's governing-law sentence is cited correctly: the agreement is governed by the laws of Maine. The claim says "Maine law governs the agreement." The deterministic judge shares only half the tokens, because it does not stem `law`/`laws` or `governs`/`governed`, and it rejects the claim.
 
-## AI Extraction vs Deterministic Scoring
+## Tests and CI
 
-ArbiLens separates these concerns on purpose.
+```bash
+cd backend
+ruff check app && ruff format --check app
+mypy app
+pytest
+```
 
-AI is used for:
+`pytest` enforces 85% coverage on `app`. GitHub Actions runs those commands, the frontend typecheck and tests, and `arbilens eval --check`.
 
-- clause classification when heuristics are ambiguous
-- concise explanation text for already-determined findings
+## Web application
 
-Deterministic logic is used for:
-
-- numeric risk scores
-- severity assignment
-- final scoring rubric behavior
-
-Why that matters:
-
-- the base score is stable and testable
-- AI variability does not change the risk model
-- the system stays explainable under review
-- malformed AI outputs fail safely instead of silently becoming persisted findings
-
-## Key Design Tradeoffs
-
-- The auth model is intentionally simple JWT-based org-scoped auth rather than a full enterprise identity stack.
-- PDF parsing focuses on digital text extraction and does not attempt heavy OCR by default.
-- AI extraction is bounded chunk-by-chunk instead of sending entire contracts in one prompt.
-- Risk scoring is rules-based, which improves consistency but limits nuanced policy interpretation.
-- The frontend uses straightforward client-side session storage for the MVP instead of more complex session infrastructure.
-
-For the reasoning behind those choices, see `docs/design-decisions.md`.
-
-## Local Development
-
-### Docker-first path
+The API, worker, and UI are still here. They need Postgres, Redis, and object storage:
 
 ```bash
 cp backend/.env.example backend/.env
@@ -177,181 +158,21 @@ cp frontend/.env.example frontend/.env.local
 docker compose -f infra/docker-compose.yml up --build
 ```
 
-The Compose stack runs migrations automatically through a one-shot `migrate` service before the API and worker start.
+Frontend at `http://localhost:3000`, API at `http://localhost:8000`, OpenAPI at `http://localhost:8000/docs`. Object storage is `adobe/s3mock` on port 9090. `minio/minio` could not be pulled from Docker Hub, and the mock's `initialBuckets` setting did not create a bucket, so `s3-init` creates `arbilens-documents`. A smoke test against this stack registered a user, uploaded a DOCX, waited for the worker, and `POST /api/v1/documents/{id}/ask` returned the unlimited-liability sentence at characters 27–97 under `1. Limitation of Liability`. Notes: [docs/development.md](docs/development.md), [docs/deployment.md](docs/deployment.md), [docs/design-decisions.md](docs/design-decisions.md), [docs/reliability.md](docs/reliability.md).
 
-If you prefer a command wrapper:
+## Limitations
 
-```bash
-make bootstrap
-make up
-```
+- Dev scores of 1.000 are on contracts written for numbered headings, marker words, and the concept list. The held-out table is the one to read. Parameters were never tuned on the held-out set.
+- The offline embedder only generalizes across `backend/app/engine/concepts.py`. A distractor that copies the question still outranks a paraphrase with different words, as Kelp shows.
+- The deterministic faithfulness judge is not entailment. It misses paraphrases outside the concept list, including "Maine law governs" for "governed by the laws of Maine", and it can accept a long quote that contains both duties.
+- Marker matching is stemmed, and `assignment` in a heading is not the same as "this assignment" in a sentence. BM25 itself is not stemmed, so "renew automatically" can miss "automatic renewal".
+- A section that holds two sentences is still one span unless it exceeds the oversized-section limit. A gold sentence inside that section can miss the 0.5 IoU cutoff. Combined sentences are the same shape.
+- No OCR. Scanned PDFs are out of scope.
+- The web application's auth, billing, and webhook handling are unchanged and still have the limits described in the older notes.
 
-Local endpoints:
+## Roadmap
 
-- Frontend: `http://localhost:3000`
-- Backend API: `http://localhost:8000`
-- OpenAPI docs: `http://localhost:8000/docs`
-- MinIO console: `http://localhost:9001`
-
-### Backend without Docker
-
-```bash
-cd backend
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -e .[dev]
-alembic upgrade head
-uvicorn app.main:app --reload
-```
-
-Run the worker:
-
-```bash
-cd backend
-source .venv/bin/activate
-celery -A app.workers.celery_worker.celery_app worker --loglevel=info
-```
-
-### Frontend without Docker
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## Testing
-
-Backend:
-
-```bash
-cd backend
-source .venv/bin/activate
-pytest app/tests
-```
-
-Frontend:
-
-```bash
-cd frontend
-npm install
-npm test
-```
-
-Browser-level e2e:
-
-```bash
-cd frontend
-npx playwright install chromium
-npm run test:e2e
-```
-
-Useful backend test areas already covered:
-
-- auth and protected routes
-- upload validation
-- parsing
-- normalization
-- clause extraction
-- deterministic scoring
-- AI schema validation and malformed-response handling
-- API serialization contract validation
-- reports
-- comparisons
-- workflow happy path and failure paths
-- one browser-level login -> upload -> completed-results path with Playwright-backed API mocking
-
-## Developer Setup
-
-Configuration files:
-
-- `backend/.env.example`
-- `frontend/.env.example`
-
-Important backend variables:
-
-- `DATABASE_URL`
-- `REDIS_URL`
-- `S3_ENDPOINT_URL`
-- `S3_BUCKET`
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL`
-- `JWT_SECRET_KEY`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `STRIPE_PRICE_ID`
-- `APP_BASE_URL`
-
-Additional setup notes: `docs/development.md`
-
-Operational and deployment notes: `docs/deployment.md`
-
-Reliability and failure-mode notes: `docs/reliability.md`
-
-Productionization priorities: `docs/adr-productionization-next.md`
-
-## API Notes
-
-Authentication:
-
-- `POST /api/v1/auth/register`
-- `POST /api/v1/auth/login`
-- `GET /api/v1/users/me`
-
-Document workflow:
-
-- `POST /api/v1/documents/upload`
-- `GET /api/v1/documents`
-- `GET /api/v1/documents/{id}`
-- `GET /api/v1/documents/{id}/status`
-- `GET /api/v1/documents/{id}/summary`
-- `GET /api/v1/documents/{id}/clauses`
-- `GET /api/v1/documents/{id}/risks`
-
-Additional product endpoints:
-
-- reports under `/api/v1/reports`
-- comparisons under `/api/v1/comparisons`
-- billing under `/api/v1/billing`
-
-The API contracts are typed on both the backend and frontend. The frontend consumes the backend through `frontend/lib/api/client.ts` and `frontend/lib/api/types.ts`.
-
-## Security And Data-Handling Considerations
-
-- The API is organization-scoped; document access is filtered by the authenticated user organization.
-- Uploads are validated for extension, MIME type, emptiness, size, and basic file signature.
-- Task errors are sanitized before being returned to clients.
-- The AI layer avoids dumping raw contract text into plain logs.
-- Risk findings and summaries are traceable to stored clause/risk records and citations.
-
-This is still an MVP-level security posture. Notable gaps remain around browser session handling, secret management in real deployments, and deeper audit logging.
-
-## Current Limitations
-
-- No heavy OCR fallback for scanned PDFs
-- No full enterprise auth model or SSO
-- No browser-level frontend integration test suite
-- Stripe webhook handling does not yet persist processed event IDs for idempotency
-- Readiness checks are practical but not a full operational health system
-
-## Future Improvements
-
-- OCR fallback for image-only PDFs
-- richer comparison explanations grounded in structured diffs
-- stronger observability around queue depth, failures, and worker performance
-- extend CI to include linting, dependency checks, and browser-level integration coverage
-- more robust frontend auth/session handling
-- webhook idempotency persistence and broader billing coverage
-
-## Deployment
-
-The repository includes deployment-oriented Dockerfiles and local Compose configuration, but it should not be described as production-ready without additional infrastructure and operational work.
-
-Deployment notes:
-
-- `docs/adr-productionization-next.md`
-- `docs/architecture.md`
-- `docs/design-decisions.md`
-- `docs/deployment.md`
-- `docs/development.md`
-- `docs/reliability.md`
+- Run the same questions through the OpenAI-compatible providers and publish that report next to the fake one, without letting it replace the offline gate.
+- Stem the retriever, not only the marker list, and publish the tuning-set comparison before touching the held-out floors.
+- Predict a sentence span inside a short section, so a gold sentence that shares its section with a second sentence can clear IoU 0.5.
+- OCR for image-only PDFs, as a separate parser in front of the same chunker.

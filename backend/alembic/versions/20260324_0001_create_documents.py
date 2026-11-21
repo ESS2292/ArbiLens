@@ -16,7 +16,7 @@ branch_labels: Sequence[str] | None = None
 depends_on: Sequence[str] | None = None
 
 
-organization_role = sa.Enum("owner", "admin", "member", name="organization_role")
+organization_role = sa.Enum("owner", "admin", "member", name="organization_role", create_type=False)
 document_status = sa.Enum(
     "uploaded",
     "queued",
@@ -27,9 +27,19 @@ document_status = sa.Enum(
     "completed",
     "failed",
     name="document_status",
+    create_type=False,
 )
-job_status = sa.Enum("queued", "parsing", "parsed", "analyzing", "completed", "failed", name="job_status")
-risk_severity = sa.Enum("low", "medium", "high", "critical", name="risk_severity")
+job_status = sa.Enum(
+    "queued",
+    "parsing",
+    "parsed",
+    "analyzing",
+    "completed",
+    "failed",
+    name="job_status",
+    create_type=False,
+)
+risk_severity = sa.Enum("low", "medium", "high", "critical", name="risk_severity", create_type=False)
 clause_type = sa.Enum(
     "indemnification",
     "limitation_of_liability",
@@ -48,8 +58,9 @@ clause_type = sa.Enum(
     "audit_rights",
     "general",
     name="clause_type",
+    create_type=False,
 )
-risk_scope = sa.Enum("document", "clause", name="risk_scope")
+risk_scope = sa.Enum("document", "clause", name="risk_scope", create_type=False)
 
 
 def upgrade() -> None:

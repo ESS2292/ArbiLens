@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from app.models.user import User
 from app.schemas.auth import OrganizationSummary
 from app.schemas.users import CurrentUserResponse
@@ -7,7 +9,7 @@ class UserService:
     def get_current_user_profile(self, user: User) -> CurrentUserResponse:
         return CurrentUserResponse(
             id=user.id,
-            organization_id=user.organization_id,
+            organization_id=UUID(str(user.organization_id)),
             email=user.email,
             full_name=user.full_name,
             role=user.role,
