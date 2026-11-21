@@ -1,14 +1,15 @@
 {
-  "provenance": "Held-out contracts written for ArbiLens after the dev set. Labels were chosen by reading the text. They were not copied from chunker output.",
+  "provenance": "Original held-out contracts written for ArbiLens and frozen before the heading, stemming, and fusion changes. They are not copied from any published agreement. Gold spans were chosen by reading the text.",
   "contracts": [
     {
-      "id": "bramble-supply",
-      "title": "Bramble Supply Terms",
-      "path": "heldout/bramble-supply.txt",
+      "id": "kelp-article",
+      "title": "Kelp Goods Supply",
+      "path": "heldout/kelp-article.txt",
       "clauses": [
         {
           "type": "limitation_of_liability",
-          "text": "Bramble Goods' entire compensation for a mishap stops at the amounts Fern Market paid during the previous calendar year."
+          "text": "Kelp Goods' entire compensation for a mishap stops at the amounts Juniper Market paid during the previous calendar year.",
+          "heading_style": "article_emdash"
         }
       ],
       "risks": [
@@ -17,58 +18,236 @@
       ],
       "questions": [
         {
-          "id": "bramble-payout",
-          "question": "What is the most Bramble Goods can be asked to pay when an ordinary accident happens?",
-          "evidence": "Bramble Goods' entire compensation for a mishap stops at the amounts Fern Market paid during the previous calendar year.",
-          "claim": "Bramble's compensation for a mishap stops at the previous calendar year's payments.",
-          "kind": "distractor"
+          "id": "kelp-payout",
+          "question": "What is the most Kelp Goods can be asked to pay when an ordinary accident happens?",
+          "evidence": "Kelp Goods' entire compensation for a mishap stops at the amounts Juniper Market paid during the previous calendar year.",
+          "claim": "Kelp's compensation for a mishap stops at the previous calendar year's payments.",
+          "kind": "distractor",
+          "heading_style": "article_emdash"
+        },
+        {
+          "id": "kelp-sample",
+          "question": "Is a sample a promise about later runs?",
+          "evidence": "A sample is not a promise about later runs.",
+          "claim": "A sample does not promise anything about later runs.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "kelp-orders",
+          "question": "Must Kelp Goods confirm a request before packing it?",
+          "evidence": "Kelp Goods confirms a request before packing it.",
+          "claim": "Kelp confirms a request before it packs the goods.",
+          "kind": "lexical",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "kelp-dates",
+          "question": "Are delivery dates in a confirmation firm?",
+          "evidence": "Delivery dates in a confirmation are estimates only.",
+          "claim": "Dates in a confirmation are only estimates.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
         }
       ]
     },
     {
-      "id": "willow-advisory",
-      "title": "Willow Advisory Arrangement",
-      "path": "heldout/willow-advisory.txt",
+      "id": "roman-dock",
+      "title": "Dock Lantern Charter",
+      "path": "heldout/roman-dock.txt",
       "clauses": [
         {
           "type": "payment_terms",
-          "text": "Oak Retail shall pay Willow Advisory within twenty days of each invoice"
+          "text": "Harbor Wren shall pay each invoice within twenty days of receipt.",
+          "heading_style": "roman"
         },
         {
-          "type": "indemnification",
-          "text": "Oak Retail shall also cover Willow Advisory against outside claims that arise from Oak Retail's instructions, including claims by Oak Retail's customers."
+          "type": "dispute_resolution",
+          "text": "Disputes about this charter go to arbitration in Portland, and exclusive venue lies in the vendor's courts.",
+          "heading_style": "roman"
+        },
+        {
+          "type": "termination",
+          "text": "Either party may terminate for convenience on thirty days of written notice.",
+          "heading_style": "roman"
         }
       ],
       "risks": [
         "missing_liability_cap",
         "missing_confidentiality",
-        "weak_data_protection"
+        "weak_data_protection",
+        "unfavorable_dispute_language"
       ],
       "questions": [
         {
-          "id": "willow-days",
-          "question": "How many days does Oak Retail have to settle an invoice?",
-          "evidence": "Oak Retail shall pay Willow Advisory within twenty days of each invoice",
-          "claim": "Oak Retail has twenty days to settle an invoice.",
-          "kind": "lexical"
+          "id": "roman-days",
+          "question": "How many days does Harbor Wren have to settle invoices?",
+          "evidence": "Harbor Wren shall pay each invoice within twenty days of receipt.",
+          "claim": "Harbor Wren must settle invoices within twenty days of receipt.",
+          "kind": "lexical",
+          "heading_style": "roman",
+          "variation": "morphology"
         },
         {
-          "id": "willow-cover",
-          "question": "Who must make Willow whole for claims caused by Oak Retail's instructions?",
-          "evidence": "Oak Retail shall also cover Willow Advisory against outside claims that arise from Oak Retail's instructions, including claims by Oak Retail's customers.",
-          "claim": "Oak Retail must cover Willow for outside claims caused by Oak Retail's instructions.",
-          "kind": "paraphrase"
+          "id": "roman-forum",
+          "question": "Where does exclusive venue lie?",
+          "evidence": "Disputes about this charter go to arbitration in Portland, and exclusive venue lies in the vendor's courts.",
+          "claim": "Exclusive venue is in the vendor's courts.",
+          "kind": "lexical",
+          "heading_style": "roman"
+        },
+        {
+          "id": "roman-end",
+          "question": "May either side terminate for convenience?",
+          "evidence": "Either party may terminate for convenience on thirty days of written notice.",
+          "claim": "Either side may end the charter for convenience on thirty days' notice.",
+          "kind": "paraphrase",
+          "heading_style": "roman"
+        },
+        {
+          "id": "roman-arbitration",
+          "question": "Do charter disputes go to arbitration?",
+          "evidence": "Disputes about this charter go to arbitration in Portland, and exclusive venue lies in the vendor's courts.",
+          "claim": "Charter disputes are sent to arbitration in Portland.",
+          "kind": "lexical",
+          "heading_style": "roman"
         }
       ]
     },
     {
-      "id": "yarrow-license",
-      "title": "Yarrow License",
-      "path": "heldout/yarrow-license.txt",
+      "id": "letter-brook",
+      "title": "Brook Mill Services",
+      "path": "heldout/letter-brook.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "Cinder Bakery shall pay invoices within ten days.",
+          "heading_style": "lettered"
+        },
+        {
+          "type": "confidentiality",
+          "text": "Each party shall keep the other's confidential information secret for three years.",
+          "heading_style": "lettered"
+        },
+        {
+          "type": "limitation_of_liability",
+          "text": "Aggregate liability shall not exceed the charges paid during the prior six months.",
+          "heading_style": "lettered"
+        }
+      ],
+      "risks": [
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "letter-fees",
+          "question": "Within how many days must invoices be paid?",
+          "evidence": "Cinder Bakery shall pay invoices within ten days.",
+          "claim": "Invoices must be paid within ten days.",
+          "kind": "lexical",
+          "heading_style": "lettered"
+        },
+        {
+          "id": "letter-secret",
+          "question": "How long is confidential information kept secret?",
+          "evidence": "Each party shall keep the other's confidential information secret for three years.",
+          "claim": "Confidential information stays secret for three years.",
+          "kind": "lexical",
+          "heading_style": "lettered"
+        },
+        {
+          "id": "letter-cap",
+          "question": "What is the cap on aggregate liability?",
+          "evidence": "Aggregate liability shall not exceed the charges paid during the prior six months.",
+          "claim": "Aggregate liability is capped at the charges paid during the prior six months.",
+          "kind": "paraphrase",
+          "heading_style": "lettered"
+        },
+        {
+          "id": "letter-work",
+          "question": "Will Brook Mill write a report about the ovens?",
+          "evidence": "Brook Mill will inspect the ovens and write a short report.",
+          "claim": "Brook Mill writes a short report after inspecting the ovens.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
+        }
+      ]
+    },
+    {
+      "id": "caps-nile",
+      "title": "Nile Glass Terms",
+      "path": "heldout/caps-nile.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "Orchid Studio shall pay each invoice within fifteen days of receipt.",
+          "heading_style": "all_caps"
+        },
+        {
+          "type": "confidentiality",
+          "text": "Each party shall protect confidential information received from the other.",
+          "heading_style": "all_caps"
+        },
+        {
+          "type": "limitation_of_liability",
+          "text": "The aggregate liability of Nile Glass under this agreement is unlimited.",
+          "heading_style": "all_caps"
+        },
+        {
+          "type": "governing_law",
+          "text": "This agreement is governed by the laws of Maine.",
+          "heading_style": "all_caps"
+        }
+      ],
+      "risks": [
+        "uncapped_liability",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "caps-days",
+          "question": "How many days does Orchid Studio have to pay an invoice?",
+          "evidence": "Orchid Studio shall pay each invoice within fifteen days of receipt.",
+          "claim": "Orchid Studio has fifteen days to pay an invoice.",
+          "kind": "lexical",
+          "heading_style": "all_caps",
+          "variation": "morphology"
+        },
+        {
+          "id": "caps-secret",
+          "question": "Must each party protect confidential information?",
+          "evidence": "Each party shall protect confidential information received from the other.",
+          "claim": "Each party must protect the other's confidential information.",
+          "kind": "lexical",
+          "heading_style": "all_caps"
+        },
+        {
+          "id": "caps-cap",
+          "question": "Is Nile Glass liability unlimited?",
+          "evidence": "The aggregate liability of Nile Glass under this agreement is unlimited.",
+          "claim": "There is no ceiling on Nile Glass's monetary exposure.",
+          "kind": "semantic",
+          "heading_style": "all_caps"
+        },
+        {
+          "id": "caps-law",
+          "question": "Which state's laws govern the agreement?",
+          "evidence": "This agreement is governed by the laws of Maine.",
+          "claim": "Maine law governs the agreement.",
+          "kind": "paraphrase",
+          "heading_style": "all_caps"
+        }
+      ]
+    },
+    {
+      "id": "title-wren",
+      "title": "Wren Atelier License",
+      "path": "heldout/title-wren.txt",
       "clauses": [
         {
           "type": "ip_ownership",
-          "text": "Once Maple Press has paid, the drawings created for the job belong to Maple Press."
+          "text": "Once Plover Soap has paid, the labels created for the job belong to Plover Soap.",
+          "heading_style": "title_case"
         }
       ],
       "risks": [
@@ -78,18 +257,459 @@
       ],
       "questions": [
         {
-          "id": "yarrow-owner",
+          "id": "title-owner",
           "question": "After the bill is settled, who keeps the pictures made for this assignment?",
-          "evidence": "Once Maple Press has paid, the drawings created for the job belong to Maple Press.",
-          "claim": "Maple Press keeps the drawings created for the job once it has paid.",
-          "kind": "distractor"
+          "evidence": "Once Plover Soap has paid, the labels created for the job belong to Plover Soap.",
+          "claim": "Plover Soap keeps the labels created for the job once it has paid.",
+          "kind": "distractor",
+          "heading_style": "title_case"
         },
         {
-          "id": "yarrow-templates",
+          "id": "title-grant",
+          "question": "May Plover Soap use the labels while a statement of work is open?",
+          "evidence": "Wren Atelier lets Plover Soap use the labels while a statement of work is open.",
+          "claim": "Plover Soap may use the labels during an open statement of work.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "title-templates",
           "question": "Who keeps the older templates?",
-          "evidence": "Yarrow Studio also keeps its older templates, and those templates stay with the studio rather than moving to the client.",
-          "claim": "The studio keeps the older templates.",
-          "kind": "lexical"
+          "evidence": "Wren Atelier also keeps its older templates.",
+          "claim": "Wren Atelier keeps the older templates.",
+          "kind": "lexical",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "title-belong",
+          "question": "Who do the labels created for the job belong to after payment?",
+          "evidence": "Once Plover Soap has paid, the labels created for the job belong to Plover Soap.",
+          "claim": "The labels created for the job belong to Plover Soap after payment.",
+          "kind": "lexical",
+          "heading_style": "title_case"
+        }
+      ]
+    },
+    {
+      "id": "inline-pebble",
+      "title": "Pebble Courier Note",
+      "path": "heldout/inline-pebble.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "Linen Shop shall pay invoices within twelve days.",
+          "heading_style": "inline"
+        },
+        {
+          "type": "confidentiality",
+          "text": "each party shall keep confidential information secret.",
+          "heading_style": "inline"
+        },
+        {
+          "type": "governing_law",
+          "text": "this note is governed by the laws of Vermont.",
+          "heading_style": "inline"
+        },
+        {
+          "type": "termination",
+          "text": "either party may terminate for convenience on fourteen days' notice.",
+          "heading_style": "inline"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "inline-days",
+          "question": "How many days does Linen Shop have to pay invoices?",
+          "evidence": "Linen Shop shall pay invoices within twelve days.",
+          "claim": "Linen Shop has twelve days to pay invoices.",
+          "kind": "lexical",
+          "heading_style": "inline"
+        },
+        {
+          "id": "inline-secret",
+          "question": "Must confidential information be kept secret?",
+          "evidence": "each party shall keep confidential information secret.",
+          "claim": "Confidential information must be kept secret.",
+          "kind": "lexical",
+          "heading_style": "inline"
+        },
+        {
+          "id": "inline-law",
+          "question": "Which law governs this note?",
+          "evidence": "this note is governed by the laws of Vermont.",
+          "claim": "Vermont law governs this note.",
+          "kind": "paraphrase",
+          "heading_style": "inline"
+        },
+        {
+          "id": "inline-end",
+          "question": "Can either party terminate for convenience?",
+          "evidence": "either party may terminate for convenience on fourteen days' notice.",
+          "claim": "Either party may end the note for convenience on fourteen days' notice.",
+          "kind": "paraphrase",
+          "heading_style": "inline"
+        }
+      ]
+    },
+    {
+      "id": "runon-sage",
+      "title": "Sage Field Notes",
+      "path": "heldout/runon-sage.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "Birch County shall pay invoices within eighteen days.",
+          "heading_style": "numbered"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "runon-days",
+          "question": "Within how many days must Birch County pay invoices?",
+          "evidence": "Birch County shall pay invoices within eighteen days.",
+          "claim": "Birch County has eighteen days to pay invoices.",
+          "kind": "lexical",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "runon-map",
+          "question": "Does Sage Field deliver a map?",
+          "evidence": "The map names the corners.",
+          "claim": "Sage Field's map names the corners of the parcel.",
+          "kind": "paraphrase",
+          "heading_style": "run_on"
+        },
+        {
+          "id": "runon-soil",
+          "question": "Is a soil sample promised?",
+          "evidence": "No sample of soil is promised.",
+          "claim": "A soil sample is not promised.",
+          "kind": "paraphrase",
+          "heading_style": "run_on"
+        },
+        {
+          "id": "runon-rain",
+          "question": "What delays the walk?",
+          "evidence": "Rain delays the walk.",
+          "claim": "Rain can delay the walk.",
+          "kind": "lexical",
+          "heading_style": "run_on"
+        }
+      ]
+    },
+    {
+      "id": "combo-iris",
+      "title": "Iris Print Order",
+      "path": "heldout/combo-iris.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "Violet Hall shall pay each invoice within nine days",
+          "heading_style": "combined_sentence"
+        },
+        {
+          "type": "indemnification",
+          "text": "Violet Hall shall indemnify Iris Print against third-party claims arising from Violet Hall's artwork.",
+          "heading_style": "combined_sentence"
+        },
+        {
+          "type": "governing_law",
+          "text": "This order is governed by the laws of Iowa.",
+          "heading_style": "numbered"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "combo-days",
+          "question": "How many days does Violet Hall have to pay an invoice?",
+          "evidence": "Violet Hall shall pay each invoice within nine days",
+          "claim": "Violet Hall has nine days to pay an invoice.",
+          "kind": "lexical",
+          "heading_style": "combined_sentence",
+          "variation": "morphology"
+        },
+        {
+          "id": "combo-cover",
+          "question": "Who must indemnify Iris Print for artwork claims?",
+          "evidence": "Violet Hall shall indemnify Iris Print against third-party claims arising from Violet Hall's artwork.",
+          "claim": "Violet Hall must indemnify Iris Print for claims caused by Violet Hall's artwork.",
+          "kind": "paraphrase",
+          "heading_style": "combined_sentence"
+        },
+        {
+          "id": "combo-law",
+          "question": "Which state's laws govern the order?",
+          "evidence": "This order is governed by the laws of Iowa.",
+          "claim": "Iowa law governs the order.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "combo-both",
+          "question": "Does the combined promise mention both payment and indemnity?",
+          "evidence": "Violet Hall shall pay each invoice within nine days, and Violet Hall shall indemnify Iris Print against third-party claims arising from Violet Hall's artwork.",
+          "claim": "The same sentence covers both the invoice timing and the indemnity.",
+          "kind": "paraphrase",
+          "heading_style": "combined_sentence"
+        }
+      ]
+    },
+    {
+      "id": "morph-flint",
+      "title": "Flint Coal Supply",
+      "path": "heldout/morph-flint.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "Ember Mill shall pay each invoice within eleven days of receipt.",
+          "heading_style": "numbered"
+        },
+        {
+          "type": "termination",
+          "text": "Flint Coal may terminate this supply for convenience.",
+          "heading_style": "numbered"
+        },
+        {
+          "type": "auto_renewal",
+          "text": "This supply uses automatic renewal for successive one-year terms.",
+          "heading_style": "numbered"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "morph-invoices",
+          "question": "How many days does Ember Mill have to pay invoices?",
+          "evidence": "Ember Mill shall pay each invoice within eleven days of receipt.",
+          "claim": "Ember Mill has eleven days to pay invoices.",
+          "kind": "lexical",
+          "heading_style": "numbered",
+          "variation": "morphology"
+        },
+        {
+          "id": "morph-termination",
+          "question": "Who may end the supply for convenience?",
+          "evidence": "Flint Coal may terminate this supply for convenience.",
+          "claim": "Flint Coal may terminate the supply for convenience.",
+          "kind": "lexical",
+          "heading_style": "numbered",
+          "variation": "morphology"
+        },
+        {
+          "id": "morph-renew",
+          "question": "Does the supply renew automatically?",
+          "evidence": "This supply uses automatic renewal for successive one-year terms.",
+          "claim": "The supply uses automatic renewal for one-year terms.",
+          "kind": "lexical",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "morph-receipt",
+          "question": "Is the eleven-day count measured from receipt?",
+          "evidence": "Ember Mill shall pay each invoice within eleven days of receipt.",
+          "claim": "The eleven days run from receipt of the invoice.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
+        }
+      ]
+    },
+    {
+      "id": "distract-cove",
+      "title": "Cove Archive License",
+      "path": "heldout/distract-cove.txt",
+      "clauses": [
+        {
+          "type": "assignment",
+          "text": "Nobody may assign this agreement without written consent.",
+          "heading_style": "numbered"
+        },
+        {
+          "type": "audit_rights",
+          "text": "Dune Theater may review the books and records once per year.",
+          "heading_style": "numbered"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "distract-assign",
+          "question": "May anyone assign this agreement without written consent?",
+          "evidence": "Nobody may assign this agreement without written consent.",
+          "claim": "Assigning this agreement requires written consent.",
+          "kind": "lexical",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "distract-roles",
+          "question": "Where is the film's assignment of roles described?",
+          "evidence": "The film's assignment of roles is described in the credits and is not a transfer of this license.",
+          "claim": "The assignment of roles is described in the credits.",
+          "kind": "distractor",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "distract-audit",
+          "question": "How often may the books and records be reviewed?",
+          "evidence": "Dune Theater may review the books and records once per year.",
+          "claim": "The books and records may be reviewed once per year.",
+          "kind": "lexical",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "distract-room",
+          "question": "Where does Cove Archive keep the reels?",
+          "evidence": "Cove Archive keeps the reels in a locked room and returns them on request.",
+          "claim": "The reels stay in a locked room.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
+        }
+      ]
+    },
+    {
+      "id": "para-moss",
+      "title": "Moss Clinic Hosting",
+      "path": "heldout/para-moss.txt",
+      "clauses": [
+        {
+          "type": "sla",
+          "text": "The monthly uptime percentage promised for the hosted service is 99.5 percent.",
+          "heading_style": "numbered"
+        },
+        {
+          "type": "data_protection",
+          "text": "Moss Hosting will apply reasonable security measures to personal data.",
+          "heading_style": "numbered"
+        },
+        {
+          "type": "force_majeure",
+          "text": "A party is excused for delay caused by a force majeure event beyond its control.",
+          "heading_style": "numbered"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality"
+      ],
+      "questions": [
+        {
+          "id": "para-uptime",
+          "question": "What monthly uptime percentage is promised?",
+          "evidence": "The monthly uptime percentage promised for the hosted service is 99.5 percent.",
+          "claim": "The promised monthly uptime percentage is 99.5 percent.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "para-security",
+          "question": "Will personal data receive reasonable security measures?",
+          "evidence": "Moss Hosting will apply reasonable security measures to personal data.",
+          "claim": "Personal data is covered by reasonable security measures.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "para-delay",
+          "question": "Is a party excused for a force majeure delay?",
+          "evidence": "A party is excused for delay caused by a force majeure event beyond its control.",
+          "claim": "Force majeure delay beyond a party's control is excused.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
+        },
+        {
+          "id": "para-clinic",
+          "question": "Who is the hosting customer?",
+          "evidence": "Moss Hosting keeps servers for Quarry Clinic.",
+          "claim": "Quarry Clinic is the customer receiving hosting.",
+          "kind": "paraphrase",
+          "heading_style": "numbered"
+        }
+      ]
+    },
+    {
+      "id": "mix-ash",
+      "title": "Ash Pottery Workshop",
+      "path": "heldout/mix-ash.txt",
+      "clauses": [
+        {
+          "type": "payment_terms",
+          "text": "River School shall pay invoices within eight days.",
+          "heading_style": "article_emdash"
+        },
+        {
+          "type": "warranties",
+          "text": "Except for the express promise to teach the class, the workshop is provided as is.",
+          "heading_style": "all_caps"
+        },
+        {
+          "type": "termination",
+          "text": "Either party may terminate for convenience by giving five days' notice.",
+          "heading_style": "lettered"
+        },
+        {
+          "type": "ip_ownership",
+          "text": "Lesson plans created for the class belong to River School after the class is paid for.",
+          "heading_style": "title_case"
+        }
+      ],
+      "risks": [
+        "missing_liability_cap",
+        "missing_confidentiality",
+        "weak_data_protection"
+      ],
+      "questions": [
+        {
+          "id": "mix-days",
+          "question": "How many days does River School have to pay invoices?",
+          "evidence": "River School shall pay invoices within eight days.",
+          "claim": "River School has eight days to pay invoices.",
+          "kind": "lexical",
+          "heading_style": "article_emdash"
+        },
+        {
+          "id": "mix-asis",
+          "question": "Is the workshop provided as is?",
+          "evidence": "Except for the express promise to teach the class, the workshop is provided as is.",
+          "claim": "Aside from the promise to teach, the workshop is provided as is.",
+          "kind": "lexical",
+          "heading_style": "all_caps"
+        },
+        {
+          "id": "mix-notice",
+          "question": "How many days' notice is required to terminate for convenience?",
+          "evidence": "Either party may terminate for convenience by giving five days' notice.",
+          "claim": "Termination for convenience needs five days' notice.",
+          "kind": "paraphrase",
+          "heading_style": "lettered"
+        },
+        {
+          "id": "mix-plans",
+          "question": "Who owns the lesson plans after payment?",
+          "evidence": "Lesson plans created for the class belong to River School after the class is paid for.",
+          "claim": "River School owns the lesson plans after paying for the class.",
+          "kind": "paraphrase",
+          "heading_style": "title_case"
         }
       ]
     }
