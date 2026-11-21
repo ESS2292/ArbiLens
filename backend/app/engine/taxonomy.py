@@ -4,6 +4,13 @@ Keys are ``ClauseType`` values. ``general`` has no markers: it is the fallback
 label the database uses when nothing more specific was detected.
 """
 
+# These single words also appear in unrelated sentences ("this assignment",
+# "legal fees", "the venue of the show"). They tag a chunk only when the
+# heading contains them. Multi-word markers in the same family still match
+# the body: "assign this agreement" is not heading-only.
+HEADING_ONLY_MARKERS = frozenset({"assignment", "ownership", "audit", "fees", "fee", "venue", "privacy"})
+
+
 CLAUSE_MARKERS: dict[str, tuple[str, ...]] = {
     "indemnification": ("indemn", "hold harmless"),
     "limitation_of_liability": ("limitation of liability", "liability cap", "cap on liability"),

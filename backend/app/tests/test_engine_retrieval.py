@@ -47,9 +47,32 @@ def test_reciprocal_rank_fusion_matches_the_formula() -> None:
     fused = reciprocal_rank_fusion([["a", "b"], ["b"]], k=60)
     assert fused["a"] == pytest.approx(1 / 61)
     assert fused["b"] == pytest.approx(1 / 62 + 1 / 61)
+    weighted = reciprocal_rank_fusion([["a"], ["b"]], k=60, weights=[1.0, 0.45])
+    assert weighted["a"] == pytest.approx(1 / 61)
+    assert weighted["b"] == pytest.approx(0.45 / 61)
     assert reciprocal_rank_fusion([[], []]) == {}
     with pytest.raises(ValueError):
         reciprocal_rank_fusion([["a"]], k=0)
+    with pytest.raises(ValueError):
+        reciprocal_rank_fusion([["a"]], weights=[1.0, 1.0])
+    with pytest.raises(ValueError):
+        reciprocal_rank_fusion([["a"]], weights=[-1.0])
+
+
+def test_sentence_bm25_prefers_the_chunk_with_the_matching_sentence() -> None:
+    chunks = [
+        _chunk(0, "Short claims note.\n"),
+        _chunk(
+            1,
+            "A long introductory sentence talks about staffing and meetings and calendars. "
+            "Oak Retail shall cover Willow against outside claims that arise from Oak Retail's instructions.",
+        ),
+    ]
+    ranked = BM25Index(chunks, unit="sentence").rank("Who covers claims caused by instructions?")
+    assert ranked[0][0] == 1
+    assert BM25Index(chunks, unit="chunk").rank("claims")
+    with pytest.raises(ValueError):
+        BM25Index(chunks, unit="paragraph")
 
 
 def test_fake_embedder_maps_synonyms_onto_the_same_concept() -> None:

@@ -23,6 +23,10 @@ class RetrievalStrategy:
     retriever_depth: int = 8
     top_k: int = 5
     clause_max_chars: int = 4000
+    # "sentence" scores each chunk by its best sentence so a long section is
+    # not beaten by a shorter neighbor that shares fewer query words.
+    bm25_unit: str = "chunk"
+    embedding_rrf_weight: float = 1.0
 
     def __post_init__(self) -> None:
         if self.chunking not in {"fixed_window", "clause_aware"}:
@@ -35,6 +39,10 @@ class RetrievalStrategy:
             raise ValueError("rrf_k, retriever_depth, and top_k must be positive")
         if self.clause_max_chars <= 0:
             raise ValueError("clause_max_chars must be positive")
+        if self.bm25_unit not in {"chunk", "sentence"}:
+            raise ValueError("bm25_unit must be 'chunk' or 'sentence'")
+        if self.embedding_rrf_weight < 0:
+            raise ValueError("embedding_rrf_weight must be >= 0")
 
 
 def baseline_strategy() -> RetrievalStrategy:
@@ -60,6 +68,8 @@ def upgraded_strategy() -> RetrievalStrategy:
         use_bm25=True,
         use_embeddings=True,
         use_reranker=True,
+        bm25_unit="sentence",
+        embedding_rrf_weight=0.45,
     )
 
 

@@ -139,6 +139,22 @@ def test_default_llm_rejects_unknown_providers(monkeypatch: pytest.MonkeyPatch) 
         default_llm()
 
 
+def test_stemmed_markers_match_morphology_and_ignore_assignment_distractors() -> None:
+    payment = "1. Payment Terms\nThe buyer shall pay each invoice within nine days.\n"
+    payment_types = [clause.clause_type for clause in extract_clauses(chunk_clause_aware(payment, max_chars=1000))]
+    assert payment_types == ["payment_terms"]
+
+    distractor = "2. Tools\nThe studio keeps the pictures made for this assignment inside a drawer.\n"
+    distractor_types = [
+        clause.clause_type for clause in extract_clauses(chunk_clause_aware(distractor, max_chars=1000))
+    ]
+    assert "assignment" not in distractor_types
+
+    real = "3. Assignment\nNeither party may assign this agreement without written consent.\n"
+    real_types = [clause.clause_type for clause in extract_clauses(chunk_clause_aware(real, max_chars=1000))]
+    assert "assignment" in real_types
+
+
 def test_marker_list_covers_the_database_enum_except_general() -> None:
     assert set(CLAUSE_MARKERS) == {item.value for item in ModelClauseType if item is not ModelClauseType.general}
     text = "1. Confidentiality\nEach party shall protect confidential information.\n"

@@ -23,14 +23,16 @@ def retrieve(
     if not chunks or not query.strip():
         return []
     rankings: list[list[str]] = []
+    weights: list[float] = []
     bm25_ranks: dict[str, int] = {}
     embedding_ranks: dict[str, int] = {}
 
     if strategy.use_bm25:
-        ranked = BM25Index(chunks).rank(query)[: strategy.retriever_depth]
+        ranked = BM25Index(chunks, unit=strategy.bm25_unit).rank(query)[: strategy.retriever_depth]
         ids = [chunks[index].chunk_id for index, _score in ranked]
         if ids:
             rankings.append(ids)
+            weights.append(1.0)
             bm25_ranks = {chunk_id: rank for rank, chunk_id in enumerate(ids, start=1)}
 
     if strategy.use_embeddings:
@@ -39,9 +41,10 @@ def retrieve(
         ids = _embedding_ranking(chunks, query, embedder, strategy.retriever_depth)
         if ids:
             rankings.append(ids)
+            weights.append(strategy.embedding_rrf_weight)
             embedding_ranks = {chunk_id: rank for rank, chunk_id in enumerate(ids, start=1)}
 
-    fused = reciprocal_rank_fusion(rankings, k=strategy.rrf_k)
+    fused = reciprocal_rank_fusion(rankings, k=strategy.rrf_k, weights=weights)
     if not fused:
         return []
     by_id = {chunk.chunk_id: chunk for chunk in chunks}
