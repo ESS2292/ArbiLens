@@ -75,6 +75,24 @@ def render_markdown(report: EvalReport) -> str:
         lines.append(
             f"| {label} | {format_metric(before)} | {format_metric(after)} | {format_metric(after - before)} |"
         )
+    if upgraded.per_heading_recall_at_1:
+        lines.extend(["", "## Recall@1 by heading style", ""])
+        lines.append("| heading style | baseline | upgraded |")
+        lines.append("| --- | ---: | ---: |")
+        styles = sorted(set(baseline.per_heading_recall_at_1) | set(upgraded.per_heading_recall_at_1))
+        for style in styles:
+            before = format_metric(baseline.per_heading_recall_at_1.get(style, 0.0))
+            after = format_metric(upgraded.per_heading_recall_at_1.get(style, 0.0))
+            lines.append(f"| {style} | {before} | {after} |")
+    if upgraded.per_heading_span_recall:
+        lines.extend(["", "## Span recall by heading style", ""])
+        lines.append("| heading style | baseline | upgraded |")
+        lines.append("| --- | ---: | ---: |")
+        styles = sorted(set(baseline.per_heading_span_recall) | set(upgraded.per_heading_span_recall))
+        for style in styles:
+            before = format_metric(baseline.per_heading_span_recall.get(style, 0.0))
+            after = format_metric(upgraded.per_heading_span_recall.get(style, 0.0))
+            lines.append(f"| {style} | {before} | {after} |")
     lines.extend(["", "## Per-type span F1", ""])
     lines.append("| clause type | baseline | upgraded |")
     lines.append("| --- | ---: | ---: |")

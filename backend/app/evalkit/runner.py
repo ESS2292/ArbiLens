@@ -43,6 +43,8 @@ class StrategyScore:
     risk_flag_accuracy: float
     risk_flag_micro_f1: float
     per_type_f1: dict[str, float]
+    per_heading_recall_at_1: dict[str, float]
+    per_heading_span_recall: dict[str, float]
 
 
 @dataclass(frozen=True)
@@ -105,11 +107,14 @@ def _score_strategy(
     loose_counts: dict[str, list[int]] = defaultdict(lambda: [0, 0, 0])
     risk_exact = 0
     risk_tp = risk_fp = risk_fn = 0
+    heading_hits: dict[str, list[bool]] = defaultdict(list)
+    heading_span_hits: dict[str, list[bool]] = defaultdict(list)
 
     for contract in dataset.contracts:
         analysis = analyze_document(contract.text, strategy)
         _accumulate_extraction(strict_counts, contract.clauses, analysis.clauses, minimum_iou=IOU_THRESHOLD)
         _accumulate_extraction(loose_counts, contract.clauses, analysis.clauses, minimum_iou=0.0)
+        _accumulate_heading_spans(heading_span_hits, contract.clauses, analysis.clauses)
         predicted_risks = {finding.rule_code for finding in analysis.risks}
         gold_risks = set(contract.risks)
         if predicted_risks == gold_risks:
@@ -129,7 +134,10 @@ def _score_strategy(
             ranked_texts = _ranked_texts(contract.text, question.question, strategy, embedder)
             rank = _first_relevant_rank(ranked_texts, question.evidence)
             ranks.append(rank)
-            recall_at_1.append(rank is not None and rank <= 1)
+            hit_at_1 = rank is not None and rank <= 1
+            recall_at_1.append(hit_at_1)
+            if question.heading_style:
+                heading_hits[question.heading_style].append(hit_at_1)
             recall_hits.append(rank is not None and rank <= RECALL_K)
             offsets_ok = citation_offsets_match(contract.text, answer.citations)
             verdict = judge.judge(question.claim, answer.citations)
@@ -153,6 +161,8 @@ def _score_strategy(
         risk_flag_accuracy=risk_exact / len(dataset.contracts),
         risk_flag_micro_f1=risk_f1,
         per_type_f1=per_type,
+        per_heading_recall_at_1={style: mean_flag(hits) for style, hits in sorted(heading_hits.items())},
+        per_heading_span_recall={style: mean_flag(hits) for style, hits in sorted(heading_span_hits.items())},
     )
 
 
@@ -172,6 +182,30 @@ def _first_relevant_rank(ranked_texts: Sequence[str], evidence: str) -> int | No
         if evidence in chunk_text:
             return index
     return None
+
+
+def _accumulate_heading_spans(
+    hits: dict[str, list[bool]],
+    gold: Sequence[GoldClause],
+    predicted: Sequence[ExtractedClause],
+) -> None:
+    """Whether each gold clause has a same-type prediction with IoU of at least 0.5."""
+
+    for clause in gold:
+        if not clause.heading_style:
+            continue
+        matched = any(
+            item.clause_type == clause.clause_type
+            and spans_match(
+                item.char_start,
+                item.char_end,
+                clause.char_start,
+                clause.char_end,
+                minimum_iou=IOU_THRESHOLD,
+            )
+            for item in predicted
+        )
+        hits[clause.heading_style].append(matched)
 
 
 def _accumulate_extraction(

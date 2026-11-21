@@ -1,6 +1,8 @@
 # Evaluation
 
-`arbilens eval` scores two splits and writes `eval/reports/latest.json` and `eval/reports/latest.md`. `--check` exits 1 when `eval/thresholds.json` fails. GitHub Actions runs that command.
+`arbilens eval` scores the dev, tuning, and held-out splits and writes `eval/reports/latest.json` and `eval/reports/latest.md`. `--check` exits 1 when `eval/thresholds.json` fails. GitHub Actions runs that command.
+
+Parameters are chosen on dev and tuning only. The held-out set is never used to pick a heading rule, a marker, a fusion weight, or a threshold. Thresholds are updated after a change is frozen, to the numbers that change just measured. `eval/reports/previous-upgraded.json` is the upgraded pipeline from before the heading, stemming, and fusion changes, scored on the same frozen files.
 
 Both splits use the offline fake embedder, the extractive reader, and the deterministic faithfulness judge. The gate does not call `ARBILENS_JUDGE_PROVIDER`.
 
@@ -18,16 +20,18 @@ Risk labels are the trigger rules in `backend/app/engine/risks.py` applied by ha
 
 ## Splits
 
-`eval/data/labels.json` is the dev set: six contracts written so numbered headings and marker words agree with the pipeline. `eval/data/heldout.json` is three contracts written afterward. Provenance for both is in `eval/data/PROVENANCE.md`.
+`eval/data/labels.json` is the dev set: six contracts written so numbered headings and marker words agree with the pipeline. `eval/data/tuning.json` is the development set: the three contracts that were inspected while the first held-out miss was diagnosed, plus four notes used to try heading styles. `eval/data/heldout.json` is twelve contracts and forty-eight questions written and committed before the heading, stemming, and fusion changes. Provenance is in `eval/data/PROVENANCE.md`.
+
+Held-out questions record `heading_style`: `article_emdash`, `roman`, `lettered`, `all_caps`, `title_case`, `inline`, `numbered`, `run_on`, and `combined_sentence`. Questions that change `invoice` to `invoices`, or `terminate` to a question about ending, set `variation` to `morphology` and keep a loader kind of `lexical`. The pipeline was not adjusted after those labels were read back as scores.
 
 ## Strategies
 
 | Name | Chunking | Retrievers | Reranker |
 | --- | --- | --- | --- |
 | baseline | fixed windows, 320 characters, no overlap | BM25 | off |
-| upgraded | clause headings the detector knows, otherwise one span until the next known heading | BM25 + fake embeddings, RRF with k = 60 | lexical bonus |
+| upgraded | clause headings, then sentence cuts inside a section longer than `clause_max_chars` | BM25 over the best sentence in each chunk, plus fake embeddings at 0.45 times the BM25 fusion weight, k = 60 | lexical bonus |
 
-Known headings are `Section 4. Liability`, `2. Payment Terms`, and `4) Payment Terms`. `Article IV — Payout` and `Ownership of new drawings` are not headings. Text under them stays in the previous chunk.
+Headings are numbered lines (`2. Payment Terms`, `Section 4. Liability`, `4) Payment Terms`), `Article IV` and `Article IV — Compensation`, lettered lines such as `(a) Fees`, short ALL-CAPS lines, unnumbered title-case lines, a short sentence-case line that follows a blank line, and an inline label (`Payment terms: ...`). An inline label is a section break and not a heading, so the sentence splitter still reads the body. A section longer than the max is cut on a blank line, then a newline, then a sentence boundary. Marker matching stems tokens, so `invoice` matches `invoices` and `terminate` matches `termination`. The words `assignment`, `ownership`, `audit`, `fees`, `venue`, and `privacy` count only in the heading. `assign this agreement` still matches the body. BM25 does not use that stemmer.
 
 ## Dataset
 
@@ -48,7 +52,7 @@ Some sections are lengthened with ordinary boilerplate ("Headings in this sectio
 | Name | Chunking | Retrievers | Reranker |
 | --- | --- | --- | --- |
 | baseline | fixed windows, 320 characters, no overlap | BM25 | off |
-| upgraded | clause headings, split only inside a long clause | BM25 + fake embeddings, RRF with k = 60 | lexical bonus |
+| upgraded | clause headings, sentence cuts only inside an oversized section | sentence-level BM25 + fake embeddings, embedding weight 0.45, k = 60 | lexical bonus |
 
 ## Metrics
 
@@ -66,17 +70,19 @@ Risk-flag accuracy. The fraction of contracts whose predicted code set equals th
 
 ## Reading the current numbers
 
-Dev scores of 1.000 mean the numbered sections, the markers, and the concept list still agree. Held-out scores are the check on that agreement.
+Dev scores of 1.000 mean the numbered sections, the markers, and the concept list still agree. Tuning is where the sentence-level BM25 score and the 0.45 embedding weight were selected. Held-out scores were computed once after that selection. They were not used to change it.
 
-On the held-out set the upgraded rank-1 recall is 0.400, below the baseline's 0.600. Span F1 is 0.000 for both. Faithfulness is 0.600 for both. The thresholds do not require the upgrade to beat the baseline on this split. They freeze the measured upgraded numbers, including that 0.400, so a later change cannot quietly drop them.
+On the current held-out set the upgraded rank-1 recall is 0.917 against a baseline of 0.792. Span F1 is 0.871 against 0.066. Faithfulness is 0.833 against 0.708. The same files, scored before the heading and fusion changes, were recall@1 0.917, span F1 0.295, and faithfulness 0.792. MRR went from 0.951 to 0.949. The thresholds freeze these upgraded numbers and the measured gaps over the current baseline.
 
-Recall@5 is a weak number here because each held-out contract has about four chunks. A miss still fits in the top five. Recall@1 and the faithfulness judge are the numbers that move.
+Recall@5 is 1.000 because many of these contracts are short. Recall@1, span F1, and the faithfulness judge are the numbers that move.
 
-Concrete misses on the upgraded path:
+Heading-style recall@1 on the upgraded held-out run is 1.000 for all-caps, roman, lettered, inline, run-on, and combined-sentence questions. Numbered questions are 0.900, title case is 0.667, and article-with-dash is 0.500. Span recall is 1.000 for all-caps, roman, inline, and title case, 0.800 for numbered, 0.750 for lettered, and 0.500 for article-with-dash and combined sentences. Assignment span F1 is 0.000 because the consent sentence shares its section with a distractor sentence, so the predicted span misses IoU 0.5. The other types are 0.500 or higher.
 
-- `bramble-payout`. The question asks what Bramble Goods can be asked to pay when an ordinary accident happens. `2. Credits` uses those words and is cited. The cap is the sentence under `Article IV — Payout`, which is not a detected heading, so it sits inside `1. Orders`. The sentence also lacks every liability marker, so the rubric reports `missing_liability_cap`. The judge rejects the credit quote.
-- `yarrow-owner`. The question asks who keeps the pictures made for this assignment after the bill is settled. `2. Tools` repeats that wording and is cited. The drawings sentence is under `Ownership of new drawings`, inside `1. Grant`. The word "assignment" in the distractor is also tagged as an assignment clause.
-- `willow-days` and `willow-cover`. Payment and the covering promise are one sentence. The gold spans are the two halves. Neither matches the section chunk at IoU 0.5. The citation is the whole sentence, so both paraphrases look supported. Faithfulness passes while span F1 stays zero. "invoice" does not match the marker "invoices", so the payment half is not tagged either.
+Concrete misses on the upgraded path, left as they measured:
+
+- `kelp-payout`. The question asks what Kelp Goods can be asked to pay when an ordinary accident happens. `2. Credits` uses those words and is cited. The cap is now its own chunk under `Article IV — Compensation`. The judge scores the credit quote at 12% overlap. Detecting the heading did not make the lexical distractor lose.
+- `morph-renew`. The question asks whether the supply renews automatically. The gold sentence says "automatic renewal". BM25 is not stemmed, the termination sentence also contains "supply", and that sentence is cited. The renewal chunk is rank 2.
+- `caps-law`. The cited sentence is the gold sentence: the agreement is governed by the laws of Maine. The claim says "Maine law governs the agreement." The deterministic judge does not stem `laws`/`law` or `governed`/`governs`, so only half the claim tokens count and the claim is rejected.
 
 ## Reproduce
 
@@ -87,6 +93,6 @@ arbilens eval
 arbilens eval --check
 ```
 
-Thresholds compare values rounded to three decimal places, the same precision as the table. Dev `min_delta_over_baseline` requires the upgrade to keep its lead on that split. Held-out `min_delta_over_baseline` is empty: the upgrade is not ahead there, and the gate does not pretend it is. Held-out floors are the measured upgraded numbers, so rank-1 recall cannot fall below 0.400 without a threshold edit.
+Thresholds compare values rounded to three decimal places, the same precision as the table. Dev and tuning `min_delta_over_baseline` require the upgrade to keep the lead it has on those splits. Tuning does not require a recall@1 lead, because the measured recall@1 matches the baseline. Held-out floors and gaps are the numbers from the single post-change run. They were not a target while the pipeline was being changed. Rank-1 recall on that split cannot fall below 0.917, and span F1 cannot fall below 0.871, without a threshold edit. Do not edit those floors in order to make a change pass, and do not pick the change by looking at the held-out misses.
 
 Update `eval/thresholds.json` and the README table in the same change as any dataset or metric edit. `backend/app/tests/test_eval_harness.py` checks that the README contains the table the code just printed.

@@ -85,9 +85,10 @@ def _eval_command(args: argparse.Namespace) -> int:
 
 def _load_reports(labels: Path) -> dict[str, EvalReport]:
     reports = {"dev": run_evaluation(load_dataset(labels))}
-    heldout = labels.parent / "heldout.json"
-    if heldout.is_file():
-        reports["heldout"] = run_evaluation(load_dataset(heldout))
+    for name in ("tuning", "heldout"):
+        path = labels.parent / f"{name}.json"
+        if path.is_file():
+            reports[name] = run_evaluation(load_dataset(path))
     return reports
 
 

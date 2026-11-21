@@ -18,6 +18,7 @@ class GoldClause:
     text: str
     char_start: int
     char_end: int
+    heading_style: str = ""
 
 
 @dataclass(frozen=True)
@@ -27,6 +28,8 @@ class GoldQuestion:
     evidence: str
     claim: str
     kind: str
+    heading_style: str = ""
+    variation: str = ""
 
 
 @dataclass(frozen=True)
@@ -103,7 +106,13 @@ def _parse_clause(contract_id: str, text: str, raw: object) -> GoldClause:
         raise ValueError(f"{contract_id} has unknown clause type {clause_type}.")
     quote = _require_str(raw, "text")
     start, end = _locate(contract_id, text, quote, kind="clause")
-    return GoldClause(clause_type=clause_type, text=quote, char_start=start, char_end=end)
+    return GoldClause(
+        clause_type=clause_type,
+        text=quote,
+        char_start=start,
+        char_end=end,
+        heading_style=_optional_str(raw, "heading_style"),
+    )
 
 
 def _parse_question(contract_id: str, text: str, raw: object) -> GoldQuestion:
@@ -125,6 +134,8 @@ def _parse_question(contract_id: str, text: str, raw: object) -> GoldQuestion:
         evidence=evidence,
         claim=claim,
         kind=kind,
+        heading_style=_optional_str(raw, "heading_style"),
+        variation=_optional_str(raw, "variation"),
     )
 
 
@@ -135,6 +146,13 @@ def _locate(contract_id: str, text: str, quote: str, *, kind: str) -> tuple[int,
     if text.find(quote, start + 1) != -1:
         raise ValueError(f"{contract_id} repeats {kind} text: {quote[:80]!r}")
     return start, start + len(quote)
+
+
+def _optional_str(raw: dict[str, object], key: str) -> str:
+    value = raw.get(key, "")
+    if not isinstance(value, str):
+        raise ValueError(f"Expected a string for {key}.")
+    return value
 
 
 def _require_str(raw: dict[str, object], key: str) -> str:

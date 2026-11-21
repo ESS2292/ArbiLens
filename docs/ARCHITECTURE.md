@@ -28,7 +28,7 @@ flowchart TD
 
 `arbilens ask` does the following:
 
-1. Chunk the contract. The upgraded strategy cuts on numbered headings (`1. Payment Terms`, `Section 4. Liability`). A chunk is an exact slice: `document[start:end] == chunk.text`. A clause longer than the configured maximum is split on paragraph breaks inside that clause, never across the next heading.
+1. Chunk the contract. The upgraded strategy cuts on numbered headings, `Article IV` and `Article IV — Compensation`, lettered `(a)` lines, short ALL-CAPS lines, title-case lines, a short line after a blank line, and an inline `Payment terms:` label. A chunk is an exact slice: `document[start:end] == chunk.text`. A section longer than the configured maximum is split on a paragraph break, then a newline, then a sentence boundary, and never across the next heading.
 2. Retrieve. BM25 ranks chunks with a positive score. The embedding provider ranks by cosine similarity. Reciprocal rank fusion adds `1 / (60 + rank)` for each list a chunk appears in. A chunk that one retriever misses is not punished by a zero from that list; it simply gets no points from it.
 3. Optionally rerank. The lexical reranker adds a small bonus for concept and token overlap. The bonus can reorder a near tie. It cannot overturn a clear fusion lead.
 4. Read. The fake provider copies the best supporting sentence out of the top passages. The OpenAI-compatible provider must return JSON `{"answer", "citations": [{"chunk_id", "quote"}]}`.
@@ -68,6 +68,6 @@ The upload pipeline is unchanged:
 
 `parse_document_task -> normalize_document_task -> extract_clauses_task -> analyze_risks_task`
 
-Normalization still cleans headers and repeated lines. It then cuts the cleaned string with `chunk_clause_aware`, the same function the CLI uses, and stores those slices with character offsets into the cleaned text. `POST /api/v1/documents/{id}/ask` retrieves over the stored slices and binds quotes the same way. A heading the detector does not know stays in the previous chunk. That is the Bramble and Yarrow failure, and it is the same failure in the API as in the eval.
+Normalization still cleans headers and repeated lines. It then cuts the cleaned string with `chunk_clause_aware`, the same function the CLI uses, and stores those slices with character offsets into the cleaned text. `POST /api/v1/documents/{id}/ask` retrieves over the stored slices and binds quotes the same way. A line the detector does not treat as a heading stays in the previous chunk.
 
 The web application still uses Postgres, Redis, Celery, and S3-compatible storage. Its design notes remain in `docs/design-decisions.md`, `docs/reliability.md`, and `docs/deployment.md`.

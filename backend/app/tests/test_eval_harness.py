@@ -68,17 +68,23 @@ def test_dataset_quotes_are_unique_and_risks_follow_the_rubric() -> None:
 
 def test_dev_set_beats_baseline_and_heldout_is_not_perfect() -> None:
     dev = run_evaluation(load_dataset(LABELS))
+    tuning = run_evaluation(load_dataset(ROOT / "eval" / "data" / "tuning.json"))
     heldout = run_evaluation(load_dataset(ROOT / "eval" / "data" / "heldout.json"))
     assert dev.strategies["upgraded"].judge == "deterministic"
     assert dev.strategies["upgraded"].retrieval_recall_at_5 > dev.strategies["baseline"].retrieval_recall_at_5
     assert dev.strategies["upgraded"].extraction_micro_f1 > dev.strategies["baseline"].extraction_micro_f1
+    assert heldout.contract_count >= 12
+    assert heldout.question_count >= 40
     assert heldout.strategies["upgraded"].citation_faithfulness < 1
     assert heldout.strategies["upgraded"].extraction_micro_f1 < 1
-    reports = {"dev": dev, "heldout": heldout}
+    assert heldout.strategies["upgraded"].extraction_micro_f1 > heldout.strategies["baseline"].extraction_micro_f1
+    reports = {"dev": dev, "tuning": tuning, "heldout": heldout}
     assert suite_failures(reports, load_thresholds(THRESHOLDS)) == []
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     assert "split=dev" in readme
+    assert "never tuned on the held-out" in readme
     assert render_headline_table(dev) in readme
+    assert render_headline_table(tuning) in readme
     assert render_headline_table(heldout) in readme
     committed = json.loads((ROOT / "eval" / "reports" / "latest.json").read_text(encoding="utf-8"))
     assert committed == json.loads(suite_to_json(reports))
